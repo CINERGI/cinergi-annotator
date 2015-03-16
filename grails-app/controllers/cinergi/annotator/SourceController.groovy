@@ -2,6 +2,14 @@ package cinergi.annotator
 
 class SourceController {
     def sourceService
+    def beforeInterceptor = [action: this.&auth]
+
+    def auth() {
+        if (!session.user) {
+            redirect(controller: 'User', action: 'home', params: params)
+            return false
+        }
+    }
 
     def showSources() {
         params.max = Math.min(params.max ? params.int('max') : 10, 100)

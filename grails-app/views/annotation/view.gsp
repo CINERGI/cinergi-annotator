@@ -60,11 +60,27 @@
                 var map = new google.maps.Map(document.getElementById(mapCanvasId),
                         mapOptions);
                 var brOpts = {
-                    bounds: bounds, map: map
+                    bounds: bounds, map: map,
+                    editable: true, draggable: true
                 };
                 var br = new google.maps.Rectangle(brOpts);
 
                 //map.fitBounds(bounds);
+                var delIdx = mapCanvasId.lastIndexOf('_')
+                var bbId = mapCanvasId.substr(delIdx + 1)
+
+                function handleBBEditing() {
+                    google.maps.event.addListener(br, 'bounds_changed', function (evt) {
+                        var ne = br.getBounds().getNorthEast();
+                        var sw = br.getBounds().getSouthWest();
+                        $('#sl_' + bbId).val(sw.lat());
+                        $('#wl_' + bbId).val(sw.lng());
+                        $('#nl_' + bbId).val(ne.lat());
+                        $('#el_' + bbId).val(ne.lng());
+                    });
+                }
+
+                handleBBEditing();
             }
 
             $('.bb').each(function (idx) {
@@ -110,6 +126,12 @@
                 });
                 kwAddDiv$.appendTo($('#keywordsPanel'));
             });
+
+            $('.bbDel').on('click', function (evt) {
+                evt.preventDefault();
+                $(this).closest('div').remove();
+                $('#annotationForm').submit();
+            });
         });
     </g:javascript>
 </head>
@@ -119,7 +141,7 @@
     <ul>
         <li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
         <g:if test="${session?.user}">
-            <li><g:link class="list" controller="source" action="showSources">Sources</g:link> </li>
+            <li><g:link class="list" controller="source" action="showSources">Sources</g:link></li>
             <li><g:link class="list" controller="User" action="logout">Logout</g:link></li>
         </g:if>
     </ul>
@@ -136,7 +158,7 @@
             <textarea style="width: 75%;" cols="100" rows="5" readonly>${abstractTxt}</textarea>
         </fieldset>
     </div>
-    <g:form action="saveAnnotations">
+    <g:form action="saveAnnotations" id="annotationForm">
         <input type="hidden" name="docId" value="${docId}"/>
 
         <div id="keywords" class="panel">
@@ -189,7 +211,7 @@
 
                             <div clas="buttons">
                                 <button type="submit" class="edit bbSave" id="bbSave_${bb.id}">Save Changes</button>
-                                <button type="button" class="delete" id="bbDelete_${bb.id}">Delete</button>
+                                <button type="button" class="delete bbDel" id="bbDelete_${bb.id}">Delete</button>
                             </div>
                         </div>
 
