@@ -17,7 +17,7 @@ class AnnotationService {
         ISOXMLGenerator generator = new ISOXMLGenerator()
         Element docEl = generator.generate(docWrapper)
         String outFile = "/tmp/${primaryKey}.xml"
-        org.neuinfo.foundry.common.util.Utils.saveXML(docEl,outFile)
+        org.neuinfo.foundry.common.util.Utils.saveXML(docEl, outFile)
         return outFile
     }
 
@@ -29,6 +29,7 @@ class AnnotationService {
                 dw.data.keywords.each { KeywordRec kw ->
                     if (kw.term.equals(ki.keyword)) {
                         kw2Del = kw
+                        pi.deletedKeywords << ki
                     }
                 }
                 if (kw2Del) {
@@ -39,6 +40,7 @@ class AnnotationService {
         }
         if (dataMap.newKeywords) {
             dataMap.newKeywords.values().each { KeywordInfo ki ->
+                pi.newKeywords << ki
                 KeywordRec kw = new KeywordRec(term: ki.keyword)
                 EntityInfoRec eir = new EntityInfoRec(category: ki.category, ontologyId: 'user-annotation',
                         start: -1, end: -1, contentLocation: 'N/A')
@@ -50,6 +52,7 @@ class AnnotationService {
         }
         if (dataMap.updatedKeywords) {
             dataMap.updatedKeywords.values().each { KeywordInfo ki ->
+                pi.updatedKeywords << ki
                 KeywordRec oldKW = dw.data.keywords[ki.id - 1]
                 assert oldKW
                 oldKW.term = ki.keyword
@@ -77,18 +80,21 @@ class AnnotationService {
         boolean bbUpdated = false
         if (dataMap.deletedBBs) {
             dataMap.deletedBBs.values().each { BoundingBox bb ->
-                BoundingBox bb2Del = AnnotationService.find(bb, dw.data.spatial.boundingBoxes)
+                BoundingBoxRec bb2Del = AnnotationService.find(bb, dw.data.spatial.boundingBoxes)
                 if (bb2Del) {
+                    pi.deletedBBs << bb
                     dw.data.spatial.boundingBoxes.remove(bb2Del)
                     bbUpdated = true
                 } else {
                     bb2Del = AnnotationService.find(bb, dw.data.spatial.derivedBoundingBoxesFromPlaces)
                     if (bb2Del) {
+                        pi.deletedBBs << bb
                         dw.data.spatial.derivedBoundingBoxesFromPlaces.remove(bb2Del)
                         bbUpdated = true
                     } else {
                         String key2Del = AnnotationService.findKey(bb, dw.data.spatial.derivedBoundingBoxesFromDerivedPlace)
                         if (key2Del) {
+                            pi.deletedBBs << bb
                             dw.data.spatial.derivedBoundingBoxesFromDerivedPlace.remove(key2Del)
                             bbUpdated = true
                         }
@@ -100,6 +106,7 @@ class AnnotationService {
             dataMap.updatedBBs.values().each { BoundingBox bb ->
                 BoundingBoxRec bb2Update = order2BBRMap[(bb.id)]
                 if (bb2Update) {
+                    pi.updatedBBs << bb
                     bb2Update.southwest.lat = bb.latSouth
                     bb2Update.southwest.lng = bb.lngWest
                     bb2Update.northeast.lat = bb.latNorth
@@ -118,6 +125,15 @@ class AnnotationService {
             if (bbUpdated) {
                 DocWrapper.collection.update(['_id': dw.id],
                         [$set: ['Data.spatial': dw.data.spatial.toMap()]])
+            }
+            if (dw.history.prov) {
+                ProvenanceData pd = ProvenanceHelper.prepAnnotationProvenance(dw, pi)
+                DocWrapper.collection.update(['_id': dw.id],
+                        [$set: ['History.prov.curVersion'       : pd.currentVersion,
+                                'History.prov.lastProcessedDate': pd.processedDate]])
+                DocWrapper.collection.update(['_id': dw.id],
+                        [$push: ['History.prov.events': pd.provDBO]])
+
             }
             dw = DocWrapper.findByPrimaryKey(dw.primaryKey)
         }

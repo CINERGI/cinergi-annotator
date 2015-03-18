@@ -129,8 +129,9 @@
 
             $('.bbDel').on('click', function (evt) {
                 evt.preventDefault();
-                $(this).closest('div').remove();
-                $('#annotationForm').submit();
+                $(this).closest('.bb').remove();
+                var form$ = $('#annotationForm')
+                form$.submit();
             });
         });
     </g:javascript>
@@ -158,7 +159,7 @@
             <textarea style="width: 75%;" cols="100" rows="5" readonly>${abstractTxt}</textarea>
         </fieldset>
     </div>
-    <g:form action="saveAnnotations" id="annotationForm">
+    <g:form action="saveAnnotations" name="annotationForm">
         <input type="hidden" name="docId" value="${docId}"/>
 
         <div id="keywords" class="panel">
@@ -230,7 +231,7 @@
         <div>
             <label for="keyword">Keyword:</label>
             <input id="keyword" name="keyword" type="text" value=""/>
-            <label for="category">Category:</label>
+            <label>Category:</label>
             <select name="category">
                 <option selected="selected" value="theme">theme</option>
                 <option value="instrument">instrument</option>

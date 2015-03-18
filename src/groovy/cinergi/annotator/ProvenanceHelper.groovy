@@ -15,7 +15,12 @@ class ProvenanceHelper {
 
     public static ProvenanceData prepAnnotationProvenance(DocWrapper dw, ProvenanceInfo pi) {
         String currentVersion = dw.history.prov.curVersion
-        Date lastProcessedDate = parseDate(dw.history.prov.lastProcessedDate)
+        Date lastProcessedDate = null
+        if (dw.history.prov.lastProcessedDate instanceof Date) {
+            lastProcessedDate = dw.history.prov.lastProcessedDate
+        } else {
+           lastProcessedDate = parseDate(dw.history.prov.lastProcessedDate)
+        }
         assert currentVersion
         ProvenanceRec.Builder builder = new ProvenanceRec.Builder('http://example.org', 'foundry')
 
@@ -24,6 +29,7 @@ class ProvenanceHelper {
         String docCreationTime = getTimeInProvenanceFormat(now)
         String label = dw.primaryKey + ':' + dw.sourceInfo.name
         String howLabel = "User annotation to keywords and/or spatial extents"
+        howLabel = pi.prepHowMessage()
         String version = org.neuinfo.foundry.common.util.Utils.nextVersion(currentVersion)
         String inDocId = builder.entityWithAttr("UUID=" + dw.primaryKey, "creationTime=" + startTime,
                 "sourceId=" + dw.sourceInfo.sourceID,

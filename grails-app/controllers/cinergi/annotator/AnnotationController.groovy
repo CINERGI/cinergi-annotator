@@ -186,9 +186,8 @@ class AnnotationController {
 
     private def prepView(DocWrapper dw, String primaryKey) {
         if (dw.history.prov) {
-            println "prov:" + dw.history.prov
-            ProvenanceHelper.prepAnnotationProvenance(dw, null)
-
+            //println "prov:" + dw.history.prov
+            //ProvenanceHelper.prepAnnotationProvenance(dw, null)
         }
 
         String title = dw.originalDoc.'gmd:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:citation'?.'gmd:CI_Citation'?.'gmd:title'?.'gco:CharacterString'?.'_$'
