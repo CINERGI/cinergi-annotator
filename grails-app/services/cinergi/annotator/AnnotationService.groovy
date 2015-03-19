@@ -116,23 +116,30 @@ class AnnotationService {
             }
         }
 
-        //TODO save provenance
         if (keywordsUpdated || bbUpdated) {
+            def updateMap = [:]
             if (keywordsUpdated) {
                 def keywordsCol = dw.data.keywords.collect { KeywordRec kw -> kw.toMap() }
-                DocWrapper.collection.update(['_id': dw.id], [$set: ['Data.keywords': keywordsCol]])
+                updateMap['Data.keywords'] = keywordsCol
+                //DocWrapper.collection.update(['_id': dw.id], [$set: ['Data.keywords': keywordsCol]])
             }
             if (bbUpdated) {
-                DocWrapper.collection.update(['_id': dw.id],
-                        [$set: ['Data.spatial': dw.data.spatial.toMap()]])
+                updateMap['Data.spatial'] = dw.data.spatial.toMap()
+                // DocWrapper.collection.update(['_id': dw.id],
+                //         [$set: ['Data.spatial': dw.data.spatial.toMap()]])
             }
+            updateMap['Processing.status'] = 'annotated'
+            DocWrapper.collection.update(['_id': dw.id], [$set: updateMap])
+
             if (dw.history.prov) {
                 ProvenanceData pd = ProvenanceHelper.prepAnnotationProvenance(dw, pi)
                 DocWrapper.collection.update(['_id': dw.id],
-                        [$set: ['History.prov.curVersion'       : pd.currentVersion,
-                                'History.prov.lastProcessedDate': pd.processedDate]])
-                DocWrapper.collection.update(['_id': dw.id],
-                        [$push: ['History.prov.events': pd.provDBO]])
+                        [$set : ['History.prov.curVersion'       : pd.currentVersion,
+                                 'History.prov.lastProcessedDate': pd.processedDate],
+                         $push: ['History.prov.events': pd.provDBO]])
+                //   DocWrapper.collection.update(['_id': dw.id],
+                //           [$push: ['History.prov.events': pd.provDBO]])
+
 
             }
             dw = DocWrapper.findByPrimaryKey(dw.primaryKey)
