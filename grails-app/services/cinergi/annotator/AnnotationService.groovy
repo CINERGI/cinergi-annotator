@@ -128,7 +128,7 @@ class AnnotationService {
                 // DocWrapper.collection.update(['_id': dw.id],
                 //         [$set: ['Data.spatial': dw.data.spatial.toMap()]])
             }
-            updateMap['Processing.status'] = 'annotated'
+            updateMap['Processing.status'] = 'annotated.1'
             DocWrapper.collection.update(['_id': dw.id], [$set: updateMap])
 
             if (dw.history.prov) {
