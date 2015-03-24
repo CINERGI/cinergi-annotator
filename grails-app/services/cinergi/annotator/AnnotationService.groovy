@@ -21,7 +21,7 @@ class AnnotationService {
         return outFile
     }
 
-    def updateDocumentEnhancements(DocWrapper dw, ProvenanceInfo pi, dataMap) {
+    def updateDocumentEnhancements(DocWrapper dw, ProvenanceInfo pi, dataMap, String username) {
         boolean keywordsUpdated = false
         if (dataMap.deletedKeywords) {
             dataMap.deletedKeywords.values().each { KeywordInfo ki ->
@@ -132,7 +132,7 @@ class AnnotationService {
             DocWrapper.collection.update(['_id': dw.id], [$set: updateMap])
 
             if (dw.history.prov) {
-                ProvenanceData pd = ProvenanceHelper.prepAnnotationProvenance(dw, pi)
+                ProvenanceData pd = ProvenanceHelper.prepAnnotationProvenance(dw, pi, username)
                 DocWrapper.collection.update(['_id': dw.id],
                         [$set : ['History.prov.curVersion'       : pd.currentVersion,
                                  'History.prov.lastProcessedDate': pd.processedDate],

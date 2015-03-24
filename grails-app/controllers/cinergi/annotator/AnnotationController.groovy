@@ -147,7 +147,7 @@ class AnnotationController {
 
         def map = ['newKeywords': newKeywords, 'newBBs': newBBs, 'updatedKeywords': updatedKeywords,
                    'updatedBBs' : updatedBBs, 'deletedKeywords': deletedKeywords, 'deletedBBs': deletedBBs]
-        def updateDW = annotationService.updateDocumentEnhancements(dw, pi, map)
+        def updateDW = annotationService.updateDocumentEnhancements(dw, pi, map, session.user.username)
         def model = prepView(updateDW, primaryKey)
 
         render(view: "view", model: model)

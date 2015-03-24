@@ -7,7 +7,6 @@ import org.apache.http.HttpResponse
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.client.methods.HttpPost
-import org.apache.http.client.utils.URIBuilder
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.DefaultHttpClient
 import org.apache.http.util.EntityUtils
@@ -28,8 +27,7 @@ class ProvenanceClient {
         DefaultHttpClient client = new DefaultHttpClient()
         client.getCredentialsProvider().setCredentials(AuthScope.ANY,
                 new UsernamePasswordCredentials(user, pwd))
-        URIBuilder builder = new URIBuilder(serverURL).setPath("/provdb/api/provenance/")
-        URI uri = builder.build()
+        URI uri = new URI(serverURL + 'provdb/api/provenance/')
         println "uri:$uri"
         HttpPost httpPost = new HttpPost(uri)
         try {

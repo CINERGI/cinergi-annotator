@@ -11,34 +11,47 @@ class ProvenanceInfo {
     List<BoundingBox> deletedBBs = []
     List<BoundingBox> newBBs = []
 
-    def prepHowMessage() {
+    static String toMsg(String prefix, String rest) {
+        if (prefix) {
+            if (Character.isUpperCase(rest.charAt(0))) {
+                return "$prefix" + rest.substring(0, 1).toLowerCase() + rest.substring(1)
+            } else {
+                return "$prefix$rest"
+            }
+        } else {
+            return rest
+        }
+    }
+
+    def prepHowMessage(String username) {
         StringBuilder sb = new StringBuilder(200)
+        String prefix = username ? "$username " : ''
         if (newKeywords) {
-            String s = prepKeywordHowMessage('Added keywords', 'Added keyword', newKeywords)
+            String s = prepKeywordHowMessage(toMsg(prefix, 'Added keyword'), newKeywords)
             if (s) {
                 sb.append(s).append(' ')
             }
         }
         if (deletedKeywords) {
-            String s = prepKeywordHowMessage('Removed keywords', 'Removed keyword', deletedKeywords)
+            String s = prepKeywordHowMessage(toMsg(prefix, 'Removed keyword'), deletedKeywords)
             if (s) {
                 sb.append(s).append(' ')
             }
         }
         if (updatedKeywords) {
-            String s = prepKeywordHowMessage('Updated keywords', 'Updated keyword', updatedKeywords)
+            String s = prepKeywordHowMessage(toMsg(prefix, 'Updated keywords'), updatedKeywords)
             if (s) {
                 sb.append(s).append(' ')
             }
         }
         if (updatedBBs) {
-            String s = prepBoundingBoxHowMessage("Updated spatial extent", updatedBBs)
+            String s = prepBoundingBoxHowMessage(toMsg(prefix, "Updated spatial extent"), updatedBBs)
             if (s) {
                 sb.append(s).append(' ')
             }
         }
         if (deletedBBs) {
-            String s = prepBoundingBoxHowMessage("Removed spatial extent", deletedBBs)
+            String s = prepBoundingBoxHowMessage(toMsg(prefix, "Removed spatial extent"), deletedBBs)
             if (s) {
                 sb.append(s).append(' ')
             }
@@ -51,7 +64,7 @@ class ProvenanceInfo {
         for (BoundingBox bb : bbList) {
             sb.append(prefix)
             if (bb.text) {
-                sb.append(' for ').append(place)
+                sb.append(' for ').append(bb.text)
             }
             sb.append(' with value ')
             sb.append('south lat:').append(bb.latSouth)
@@ -63,7 +76,7 @@ class ProvenanceInfo {
         sb.toString().trim()
     }
 
-    def prepKeywordHowMessage(String pluralPrefix, String singularPrefix, List<KeywordInfo> kiList) {
+    def prepKeywordHowMessage(String singularPrefix, List<KeywordInfo> kiList) {
         def map = [:]
         kiList.each { KeywordInfo ki ->
             Set<String> kwSet = map[ki.category]
@@ -76,7 +89,7 @@ class ProvenanceInfo {
         StringBuilder sb = new StringBuilder(200)
         map.each { String category, Set<String> list ->
             if (list.size() > 1) {
-                sb.append(pluralPrefix).append(' ').append(list.join(','))
+                sb.append(singularPrefix).append('s ').append(list.join(','))
                         .append(" for category ").append(category)
                         .append(". ")
             } else {

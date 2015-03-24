@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat
  */
 class ProvenanceHelper {
 
-    public static ProvenanceData prepAnnotationProvenance(DocWrapper dw, ProvenanceInfo pi) {
+    public static ProvenanceData prepAnnotationProvenance(DocWrapper dw, ProvenanceInfo pi, String username) {
         String currentVersion = dw.history.prov.curVersion
         Date lastProcessedDate = null
         if (dw.history.prov.lastProcessedDate instanceof Date) {
@@ -29,7 +29,7 @@ class ProvenanceHelper {
         String docCreationTime = getTimeInProvenanceFormat(now)
         String label = dw.primaryKey + ':' + dw.sourceInfo.name
         String howLabel = "User annotation to keywords and/or spatial extents"
-        howLabel = pi.prepHowMessage()
+        howLabel = pi.prepHowMessage(username)
         String version = org.neuinfo.foundry.common.util.Utils.nextVersion(currentVersion)
         String inDocId = builder.entityWithAttr("UUID=" + dw.primaryKey, "creationTime=" + startTime,
                 "sourceId=" + dw.sourceInfo.sourceID,
