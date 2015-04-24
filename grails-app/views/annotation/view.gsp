@@ -172,7 +172,15 @@
                             <label for="keyword_${kw.id}">Keyword:</label>
                             <input id="keyword_${kw.id}" name="keyword_${kw.id}" type="text" value="${kw.keyword}"/>
                             <label for="category_${kw.id}">Category:</label>
-                            <g:select name="category_${kw.id}" from="${['theme', 'instrument', 'location']}"
+                            <g:select name="category_${kw.id}" from="${[
+                                    'Atmosphere', 'Chemical entity', 'Document',
+                                    'Environmental material', 'Equipment', 'Geographic location',
+                                    'Geosphere', 'Habitat', 'Human activity',
+                                    'Location', 'Material entity', 'Observed Property',
+                                    'Organization', 'Place', 'Process', 'Publication', 'Resource originator',
+                                    'Specification', 'Theme', 'Unknown', 'Water body', 'chemical process',
+                                    'dataCenter', 'dataResolution', 'dataset', 'discipline',
+                                    'instrument', 'place', 'platform', 'project', 'stratum', 'temporal', 'theme']}"
                                       value="${kw.category}"/>
                             %{--  <input id="category_${kw.id}" type="text" value="${kw.category}" readonly/> --}%
                             <button type="button" class="delete kwd" id="kwDelete_${kw.id}">Delete</button>
