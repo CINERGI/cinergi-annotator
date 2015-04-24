@@ -258,7 +258,9 @@ class AnnotationController {
         }
         List<KeywordInfo> keywordList = new ArrayList<KeywordInfo>()
         // FIXME
-        keywordList.addAll(categoryKwMap.values())
+        for(String key : categoryKwMap.keySet()) {
+            keywordList.addAll(categoryKwMap[key])
+        }
         /*
         if (categoryKwMap) {
             if (categoryKwMap.containsKey('theme')) {
