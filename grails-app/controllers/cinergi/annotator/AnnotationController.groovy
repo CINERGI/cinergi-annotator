@@ -192,6 +192,12 @@ class AnnotationController {
 
         String title = dw.originalDoc.'gmd:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:citation'?.'gmd:CI_Citation'?.'gmd:title'?.'gco:CharacterString'?.'_$'
         String abstractTxt = dw.originalDoc.'gmd:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:abstract'?.'gco:CharacterString'?.'_$'
+        if (!abstractTxt) {
+            abstractTxt = dw.originalDoc.'MD_Metadata'?.'identificationInfo'?.'MD_DataIdentification'?.'abstract'?.'gco:CharacterString'?.'_$'
+        }
+        if (!title) {
+            title = dw.originalDoc.'MD_Metadata'?.'identificationInfo'?.'MD_DataIdentification'?.'citation'?.'CI_Citation'?.'title'?.'gco:CharacterString'?.'_$'
+        }
         println "abstract:" + abstractTxt
         println "title:" + title
         def boundingBoxes = dw.data.spatial?.boundingBoxes
@@ -252,6 +258,8 @@ class AnnotationController {
         }
         List<KeywordInfo> keywordList = new ArrayList<KeywordInfo>()
         // FIXME
+        keywordList.addAll(categoryKwMap.values())
+        /*
         if (categoryKwMap) {
             if (categoryKwMap.containsKey('theme')) {
                 keywordList.addAll(categoryKwMap['theme'])
@@ -263,6 +271,7 @@ class AnnotationController {
                 keywordList.addAll(categoryKwMap['location'])
             }
         }
+        */
         String sourceName = dw.sourceInfo.name
         return ["bbList": bbList, "keywords": keywordList, 'abstractTxt': abstractTxt,
                 'docId' : primaryKey, 'sourceName': sourceName, 'titleTxt': title]
