@@ -1,11 +1,10 @@
 package cinergi.annotator
 
-import groovy.json.JsonSlurper
-import org.json.JSONObject
-
 class AnnotationController {
     def annotationService
-    def beforeInterceptor = [action: this.&auth]
+    def jmsService
+    def beforeInterceptor = [action: this.&auth, except: ['resourceEntered2Scicrunch']]
+    static allowedMethods = [resourceEntered2Scicrunch: 'GET']
 
     def auth() {
         if (!session.user) {
@@ -18,6 +17,11 @@ class AnnotationController {
         File f = new File('/home/bozyurt/dev/js/jquery.xmleditor/demo/examples/MD_Metadata.xsd')
         assert f.isFile()
         render(contentType: 'application/xml', text: f.text, encoding: 'UTF-8')
+    }
+
+    def resourceEntered2Scicrunch() {
+        jmsService.send('foundry.scicrunchIn', '', null)
+        render(status: 200)
     }
 
     def saveAnnotations() {
@@ -258,7 +262,7 @@ class AnnotationController {
         }
         List<KeywordInfo> keywordList = new ArrayList<KeywordInfo>()
         // FIXME
-        for(String key : categoryKwMap.keySet()) {
+        for (String key : categoryKwMap.keySet()) {
             keywordList.addAll(categoryKwMap[key])
         }
         /*

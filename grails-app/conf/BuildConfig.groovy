@@ -48,7 +48,7 @@ grails.project.dependency.resolution = {
         mavenCentral()
         // uncomment these (or add new ones) to enable remote dependency resolution from public Maven repositories
         //mavenRepo "http://repository.codehaus.org"
-        //mavenRepo "http://download.java.net/maven/2/"
+        mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
 
@@ -56,6 +56,7 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
         // runtime 'mysql:mysql-connector-java:5.1.27'
         // runtime 'org.postgresql:postgresql:9.3-1100-jdbc41'
+         compile 'org.apache.activemq:activemq-all:5.11.1'
     }
 
     plugins {
@@ -74,6 +75,7 @@ grails.project.dependency.resolution = {
         runtime ":resources:1.2.7"
         compile ':rest:0.7'  // for HttpBuilder
         compile ":mongodb:3.0.2"
+        runtime ":jms:1.3"
         // Uncomment these (or add new ones) to enable additional resources capabilities
         //runtime ":zipped-resources:1.0.1"
         //runtime ":cached-resources:1.1"
