@@ -58,7 +58,7 @@ grails.project.dependency.resolution = {
         // runtime 'mysql:mysql-connector-java:5.1.27'
         // runtime 'org.postgresql:postgresql:9.3-1100-jdbc41'
          compile('org.apache.activemq:activemq-all:5.11.1') {
-             excludes(["spring-asm","slf4j-api"])
+             excludes(["spring-context","slf4j-api","slf4j-log4j12"])
          }
     }
 
