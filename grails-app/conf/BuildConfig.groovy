@@ -41,6 +41,7 @@ grails.project.dependency.resolution = {
     repositories {
         inherits true // Whether to inherit repository definitions from plugins
 
+
         grailsPlugins()
         grailsHome()
         mavenLocal()
@@ -56,10 +57,13 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
         // runtime 'mysql:mysql-connector-java:5.1.27'
         // runtime 'org.postgresql:postgresql:9.3-1100-jdbc41'
-         compile 'org.apache.activemq:activemq-all:5.11.1'
+         compile('org.apache.activemq:activemq-all:5.11.1') {
+             excludes(["spring-asm","slf4j-api"])
+         }
     }
 
     plugins {
+
         // plugins for the build system only
         build ":tomcat:7.0.52.1"
 
