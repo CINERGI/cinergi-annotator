@@ -57,9 +57,18 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
         // runtime 'mysql:mysql-connector-java:5.1.27'
         // runtime 'org.postgresql:postgresql:9.3-1100-jdbc41'
-         compile('org.apache.activemq:activemq-all:5.11.1') {
-             excludes(["spring-context","slf4j-api","slf4j-log4j12"])
-         }
+
+/*
+        compile('org.apache.activemq:activemq-core:5.3.0',
+                'org.apache.activemq:activeio-core:3.1.2',
+                'org.apache.xbean:xbean-spring:3.7') {
+            excludes 'activemq-openwire-generator'
+            excludes 'commons-logging'
+            excludes 'xalan'
+            excludes 'xml-apis'
+            exported = false
+        }
+   */
     }
 
     plugins {
@@ -68,18 +77,18 @@ grails.project.dependency.resolution = {
         build ":tomcat:7.0.52.1"
 
         // plugins for the compile step
-       // compile ":scaffolding:2.0.3"
+        // compile ":scaffolding:2.0.3"
         compile ':cache:1.1.2'
 
         // plugins needed at runtime but not for compilation
-      //  runtime ":hibernate:3.6.10.13" // or ":hibernate4:4.3.5.1"
-      //  runtime ":database-migration:1.4.0"
+        //  runtime ":hibernate:3.6.10.13" // or ":hibernate4:4.3.5.1"
+        //  runtime ":database-migration:1.4.0"
         runtime ":jquery:1.11.0.2"
         runtime ":jquery-ui:1.10.4"
         runtime ":resources:1.2.7"
         compile ':rest:0.7'  // for HttpBuilder
         compile ":mongodb:3.0.2"
-        runtime ":jms:1.3"
+       //  runtime ":jms:1.3"
         // Uncomment these (or add new ones) to enable additional resources capabilities
         //runtime ":zipped-resources:1.0.1"
         //runtime ":cached-resources:1.1"

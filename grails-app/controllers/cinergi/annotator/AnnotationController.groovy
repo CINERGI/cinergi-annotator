@@ -2,9 +2,9 @@ package cinergi.annotator
 
 class AnnotationController {
     def annotationService
-    def jmsService
-    def beforeInterceptor = [action: this.&auth, except: ['resourceEntered2Scicrunch']]
-    static allowedMethods = [resourceEntered2Scicrunch: 'GET']
+    // def jmsService
+    def beforeInterceptor = [action: this.&auth]
+   // static allowedMethods = [resourceEntered2Scicrunch: 'GET']
 
     def auth() {
         if (!session.user) {
@@ -19,10 +19,12 @@ class AnnotationController {
         render(contentType: 'application/xml', text: f.text, encoding: 'UTF-8')
     }
 
+    /*
     def resourceEntered2Scicrunch() {
         jmsService.send('foundry.scicrunchIn', '', null)
         render(status: 200)
     }
+    */
 
     def saveAnnotations() {
         println params
