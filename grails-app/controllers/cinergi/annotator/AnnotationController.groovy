@@ -1,10 +1,13 @@
 package cinergi.annotator
 
+import com.mongodb.BasicDBList
+import com.mongodb.BasicDBObject
+
 class AnnotationController {
     def annotationService
     // def jmsService
     def beforeInterceptor = [action: this.&auth]
-   // static allowedMethods = [resourceEntered2Scicrunch: 'GET']
+    // static allowedMethods = [resourceEntered2Scicrunch: 'GET']
 
     def auth() {
         if (!session.user) {
@@ -190,6 +193,39 @@ class AnnotationController {
 
     }
 
+    private def depthFirst(parent, String label, list) {
+        if (!parent) return
+        if (parent instanceof BasicDBObject) {
+            BasicDBObject p = (BasicDBObject) parent
+            for (String key : p.keySet()) {
+                if (key == label) {
+                    list << p[key]
+                } else {
+                    depthFirst(p[key], label, list)
+                }
+            }
+        } else if (parent instanceof BasicDBList) {
+            BasicDBList plist = (BasicDBList) parent
+            for (p in plist) {
+                depthFirst(p, label, list)
+            }
+        } else {
+            if (parent instanceof Map.Entry) {
+                if (parent.key == label) {
+                    list << parent.value
+                } else {
+                    depthFirst(parent.value, label, list)
+                }
+            }
+        }
+    }
+
+    private String getText(node) {
+        def list = []
+        depthFirst(node, '_$', list)
+        return list ? list[0] : null
+    }
+
     private def prepView(DocWrapper dw, String primaryKey) {
         if (dw.history.prov) {
             //println "prov:" + dw.history.prov
@@ -204,8 +240,49 @@ class AnnotationController {
         if (!title) {
             title = dw.originalDoc.'MD_Metadata'?.'identificationInfo'?.'MD_DataIdentification'?.'citation'?.'CI_Citation'?.'title'?.'gco:CharacterString'?.'_$'
         }
+        if (!title) {
+            title = dw.originalDoc.'gmi:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:citation'?.'gmd:CI_Citation'?.'gmd:title'?.'gco:CharacterString'?.'_$'
+        }
+        if (!abstractTxt) {
+            abstractTxt = dw.originalDoc.'gmi:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:abstract'?.'gco:CharacterString'?.'_$'
+        }
+
         println "abstract:" + abstractTxt
         println "title:" + title
+
+        String keywordTag = 'gmd:keyword'
+        String keywordTypeCodeTag = 'gmd:MD_KeywordTypeCode'
+        def dkList = dw.originalDoc.'gmd:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:descriptiveKeywords'
+        if (!dkList) {
+            dkList = dw.originalDoc.'gmi:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:descriptiveKeywords'
+        }
+        if (!dkList) {
+            dkList = dw.originalDoc.'MD_Metadata'?.'identificationInfo'?.'MD_DataIdentification'?.'descriptiveKeywords'
+            keywordTag = 'keyword'
+            keywordTypeCodeTag = 'MD_KeywordTypeCode'
+        }
+        def allKeywordMap = [:]
+        int allIdx = 1000
+        if (dkList) {
+            for (dk in dkList) {
+                def kList = []
+                depthFirst(dk, keywordTag, kList)
+                def typeList = []
+                depthFirst(dk, keywordTypeCodeTag, typeList)
+                if (kList) {
+                    String type = getText(typeList[0])
+                    if (type) {
+                        println "type:$type"
+                        kList.each { kn ->
+                            String k = getText(kn);
+                            println k
+                            KeywordInfo ki = new KeywordInfo(keyword: k, category: type, id: allIdx++)
+                            allKeywordMap["$k:$type"] = ki
+                        }
+                    }
+                }
+            }
+        }
         def boundingBoxes = dw.data.spatial?.boundingBoxes
         List<BoundingBox> bbList = new ArrayList<>(5)
         int idx = 1
@@ -280,9 +357,20 @@ class AnnotationController {
             }
         }
         */
+        List<KeywordInfo> existingKeywords = new ArrayList<KeywordInfo>()
+        def kmap = [:]
+        keywordList.each { KeywordInfo ki -> kmap["${ki.keyword}:${ki.category}"] = ki }
+        allKeywordMap.values().each { KeywordInfo ki ->
+            if (!kmap["${ki.keyword}:${ki.category}"]) {
+                existingKeywords << ki
+            }
+        }
+
         String sourceName = dw.sourceInfo.name
-        return ["bbList": bbList, "keywords": keywordList, 'abstractTxt': abstractTxt,
-                'docId' : primaryKey, 'sourceName': sourceName, 'titleTxt': title]
+        String sourceID = dw.sourceInfo.sourceID
+        return ["bbList"          : bbList, "keywords": keywordList, 'abstractTxt': abstractTxt,
+                'docId'           : primaryKey, 'sourceName': sourceName, 'titleTxt': title,
+                "existingKeywords": existingKeywords, "sourceID": sourceID]
 
     }
 }

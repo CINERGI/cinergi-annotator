@@ -150,7 +150,7 @@
             <label for="keyword">Keyword:</label>
             <input id="keyword" name="keyword" type="text" value=""/>
             <label>Category:</label>
-            <g:select name="placeholder" from="${[
+            <g:select name="categoryr" from="${[
                     'Atmosphere', 'Chemical entity', 'Document',
                     'Environmental material', 'Equipment', 'Geographic location',
                     'Geosphere', 'Habitat', 'Human activity',

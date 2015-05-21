@@ -33,7 +33,9 @@
     <ul>
         <li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
         <g:if test="${session?.user}">
+            %{--
             <li><g:link class="list" controller="EntryForm" action="index">Entry Form</g:link></li>
+            --}%
             <li><g:link class="list" controller="User" action="logout"><g:message code="Logout"
                                                                                   args="[entityName]"/></g:link></li>
         </g:if>

@@ -7,7 +7,11 @@ import org.neuinfo.foundry.common.util.ISOXMLGenerator
 
 @Transactional
 class AnnotationService {
+    def mongo
 
+    def getKeywords(String primaryKey) {
+
+    }
     def findDocument(String primaryKey) {
         return DocWrapper.findByPrimaryKey(primaryKey)
     }

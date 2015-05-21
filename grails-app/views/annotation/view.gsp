@@ -108,7 +108,7 @@
             $('#kwAdd').on('click', function (evt) {
                 evt.preventDefault();
                 ++newKwdIndex;
-                var kwAddDiv$ = $('#addKeywordTemplate').contents().clone()
+                var kwAddDiv$ = $('#addKeywordTemplate').contents().clone();
                 $('label', kwAddDiv$).each(function () {
                     var oldFor = $(this).attr('for');
                     $(this).attr("for", oldFor + "_n" + newKwdIndex);
@@ -142,7 +142,7 @@
     <ul>
         <li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
         <g:if test="${session?.user}">
-            <li><g:link class="list" controller="source" action="showSources">Sources</g:link></li>
+            <li><g:link class="list" controller="source" action="showSources" params="${[selectedSource: sourceID]}">Sources</g:link></li>
             <li><g:link class="list" controller="User" action="logout">Logout</g:link></li>
         </g:if>
     </ul>
@@ -164,7 +164,7 @@
 
         <div id="keywords" class="panel">
             <fieldset>
-                <legend>Keywords</legend>
+                <legend>Enhanced Keywords</legend>
 
                 <div id="keywordsPanel">
                     <g:each in="${keywords}" status="i" var="kw">
@@ -193,7 +193,23 @@
                     <button type="submit" class="edit" id="kwSave">Save Changes</button>
                 </div>
             </fieldset>
+        </div>
 
+        <div id="keywords" class="panel">
+            <fieldset>
+                <legend>Existing Keywords</legend>
+
+                <div id="ekPanel">
+                    <g:each in="${existingKeywords}" status="i" var="kw">
+                        <div>
+                            <label for="ek_${kw.id}">Keyword:</label>
+                            <input id="ek_${kw.id}" name="ek_${kw.id}" type="text" value="${kw.keyword}" readonly/>
+                            <label for="ekc_${kw.id}">Category:</label>
+                            <input id="ekc_${kw.id}_${kw.id}" name="ekc_${kw.id}" type="text" value="${kw.category}" readonly/>
+                        </div>
+                    </g:each>
+                </div>
+            </fieldset>
         </div>
 
         <div id="bounding_boxes" class="panel">
@@ -240,11 +256,15 @@
             <label for="keyword">Keyword:</label>
             <input id="keyword" name="keyword" type="text" value=""/>
             <label>Category:</label>
-            <select name="category">
-                <option selected="selected" value="theme">theme</option>
-                <option value="instrument">instrument</option>
-                <option value="location">location</option>
-            </select>
+            <g:select name="category" from="${[
+                    'Atmosphere', 'Chemical entity', 'Document',
+                    'Environmental material', 'Equipment', 'Geographic location',
+                    'Geosphere', 'Habitat', 'Human activity',
+                    'Location', 'Material entity', 'Observed Property',
+                    'Organization', 'Place', 'Process', 'Publication', 'Resource originator',
+                    'Specification', 'Theme', 'Unknown', 'Water body', 'chemical process',
+                    'dataCenter', 'dataResolution', 'dataset', 'discipline',
+                    'instrument', 'place', 'platform', 'project', 'stratum', 'temporal', 'theme']}"/>
             <button type="button" class="delete">Delete</button>
         </div>
     </div>
