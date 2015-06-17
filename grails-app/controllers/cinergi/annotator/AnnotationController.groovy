@@ -2,6 +2,9 @@ package cinergi.annotator
 
 import com.mongodb.BasicDBList
 import com.mongodb.BasicDBObject
+import org.neuinfo.foundry.common.model.EntityInfo
+import org.neuinfo.foundry.common.model.Keyword
+import org.neuinfo.foundry.common.util.CategoryHierarchyHandler
 
 class AnnotationController {
     def annotationService
@@ -52,6 +55,7 @@ class AnnotationController {
         }
         Set<Integer> seenKeywordIdSet = new HashSet<Integer>(17)
         Set<Integer> seenBBIdSet = new HashSet<Integer>(7)
+        Set<Integer> unassignedIdSet = new HashSet<Integer>(17)
         params.each { String k, String v ->
             if (k.startsWith('keyword_') && v) {
                 v = v.trim()
@@ -106,18 +110,26 @@ class AnnotationController {
                     KeywordInfo curKW = curKeywords[(id)]
                     assert curKW
                     if (curKW.category != v) {
-                        KeywordInfo ukw = updatedKeywords[(id)]
-                        if (!ukw) {
-                            ukw = curKW
-                            updatedKeywords[(id)] = ukw
+                        if (v.equalsIgnoreCase("unassigned")) {
+                            updatedKeywords.remove(id)
+                        } else {
+                            KeywordInfo ukw = updatedKeywords[(id)]
+                            if (!ukw) {
+                                ukw = curKW
+                                updatedKeywords[(id)] = ukw
+                            }
+                            ukw.category = v
                         }
-                        ukw.category = v
                     }
                 } else {
                     int id = Utils.extractNewIdFromName(k)
-                    KeywordInfo nkw = newKeywords[(id)]
-                    assert nkw
-                    nkw.category = v
+                    if (v.equalsIgnoreCase("unassigned")) {
+                        newKeywords.remove(id)
+                    } else {
+                        KeywordInfo nkw = newKeywords[(id)]
+                        assert nkw
+                        nkw.category = v
+                    }
                 }
             }
         }
@@ -163,7 +175,6 @@ class AnnotationController {
     }
 
     def index() {
-//        String primaryKey = 'OT.092012.26913.2'
         String primaryKey = '5a8c8834-b09e-47df-a5d5-053b9864229c'
         primaryKey = 'f66c287b-7e22-4680-8020-15525aebbc7d'
         String bbTestPrimaryKey = '505b9142e4b08c986b3197e9'
@@ -175,15 +186,6 @@ class AnnotationController {
 
         DocWrapper dw = annotationService.findDocument(primaryKey)
         assert dw
-        //println dw
-
-        /*
-        String homeDir = System.getProperty('user.home')
-        File f = new File(homeDir,'dev/java/cinergi-annotator/cinergi_test.json')
-        assert f.isFile()
-        def slurper = new JsonSlurper()
-        def result = slurper.parseText(f.text)
-        */
 
         //String abstractTxt = result.OriginalDoc.'gmd:MD_Metadata'.'gmd:identificationInfo'
         //        .'gmd:MD_DataIdentification'.'gmd:abstract'.'gco:CharacterString'.'_$'
@@ -323,11 +325,40 @@ class AnnotationController {
         //def keywords = result.Data.keywords
         def keywords = dw.data.keywords
         def categoryKwMap = [:]
+        CategoryHierarchyHandler chh = CategoryHierarchyHandler.getInstance()
         idx = 1
         if (keywords) {
             println keywords
+            List<Keyword> keywordList = new ArrayList<Keyword>(keywords.size())
+            keywords.each { k ->
+                Keyword keyword = new Keyword(k.term)
+                for (eiRec in k.entityInfos) {
+                    EntityInfo ei = new EntityInfo(eiRec.contentLocation, eiRec.id, eiRec.start, eiRec.end, eiRec.category)
+                    keyword.addEntityInfo(ei)
+                }
+                keywordList << keyword
+            }
+            keywordList.each { Keyword kw ->
+                Set<String> categories = kw.getCategories()
+                if (categories.size() > 0) {
+                    String category = kw.getTheCategory(chh)
+                    String cinergiCategory = chh.getCinergiCategory(category)
+                    if (cinergiCategory) {
+                        category = cinergiCategory;
+                    }
+                    List<KeywordInfo> kiList = categoryKwMap[category]
+                    if (!kiList) {
+                        kiList = new ArrayList<KeywordInfo>(5)
+                        categoryKwMap[category] = kiList
+                    }
+                    kiList << new KeywordInfo(keyword: kw.getTerm(), category: category, id: idx)
+                    idx++
+                }
+            }
+            /*
             keywords.each { k ->
                 println "EntityInfo:>> " + k.entityInfos[0]
+
                 String category = k.entityInfos[0].category
                 String term = k.term
                 List<KeywordInfo> kiList = categoryKwMap[category]
@@ -338,25 +369,13 @@ class AnnotationController {
                 kiList << new KeywordInfo(keyword: term, category: category, id: idx)
                 idx++
             }
+            */
         }
         List<KeywordInfo> keywordList = new ArrayList<KeywordInfo>()
-        // FIXME
         for (String key : categoryKwMap.keySet()) {
             keywordList.addAll(categoryKwMap[key])
         }
-        /*
-        if (categoryKwMap) {
-            if (categoryKwMap.containsKey('theme')) {
-                keywordList.addAll(categoryKwMap['theme'])
-            }
-            if (categoryKwMap.containsKey('instrument')) {
-                keywordList.addAll(categoryKwMap['instrument'])
-            }
-            if (categoryKwMap.containsKey('location')) {
-                keywordList.addAll(categoryKwMap['location'])
-            }
-        }
-        */
+
         List<KeywordInfo> existingKeywords = new ArrayList<KeywordInfo>()
         def kmap = [:]
         keywordList.each { KeywordInfo ki -> kmap["${ki.keyword}:${ki.category}"] = ki }
@@ -366,11 +385,15 @@ class AnnotationController {
             }
         }
 
+        List<String> categories4DD = chh.getSortedCinergiCategories()
+        categories4DD.add(0, 'Unassigned')
+
         String sourceName = dw.sourceInfo.name
         String sourceID = dw.sourceInfo.sourceID
         return ["bbList"          : bbList, "keywords": keywordList, 'abstractTxt': abstractTxt,
                 'docId'           : primaryKey, 'sourceName': sourceName, 'titleTxt': title,
-                "existingKeywords": existingKeywords, "sourceID": sourceID]
+                "existingKeywords": existingKeywords, "sourceID": sourceID,
+                "categories"      : categories4DD]
 
     }
 }
