@@ -5,6 +5,8 @@ import com.mongodb.BasicDBObject
 import org.neuinfo.foundry.common.model.EntityInfo
 import org.neuinfo.foundry.common.model.Keyword
 import org.neuinfo.foundry.common.util.CategoryHierarchyHandler
+import org.neuinfo.foundry.common.util.FacetHierarchyHandler
+import org.neuinfo.foundry.common.util.IHierarchyHandler
 
 class AnnotationController {
     def annotationService
@@ -325,7 +327,8 @@ class AnnotationController {
         //def keywords = result.Data.keywords
         def keywords = dw.data.keywords
         def categoryKwMap = [:]
-        CategoryHierarchyHandler chh = CategoryHierarchyHandler.getInstance()
+        IHierarchyHandler chh = FacetHierarchyHandler.getInstance();
+        // CategoryHierarchyHandler chh = CategoryHierarchyHandler.getInstance()
         idx = 1
         if (keywords) {
             println keywords
