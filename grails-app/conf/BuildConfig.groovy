@@ -69,6 +69,7 @@ grails.project.dependency.resolution = {
             exported = false
         }
    */
+        compile 'org.apache.httpcomponents:httpclient:jar:4.2.3'
     }
 
     plugins {
@@ -86,7 +87,7 @@ grails.project.dependency.resolution = {
         runtime ":jquery:1.11.0.2"
         runtime ":jquery-ui:1.10.4"
         runtime ":resources:1.2.7"
-        compile ':rest:0.7'  // for HttpBuilder
+       // compile ':rest:0.7'  // for HttpBuilder
         compile ":mongodb:3.0.2"
        //  runtime ":jms:1.3"
         // Uncomment these (or add new ones) to enable additional resources capabilities

@@ -175,6 +175,7 @@
                             <g:select name="category_${kw.id}" from="${categories}" value="${kw.category}"/>
                             %{--  <input id="category_${kw.id}" type="text" value="${kw.category}" readonly/> --}%
                             <button type="button" class="delete kwd" id="kwDelete_${kw.id}">Delete</button>
+                            ${kw.category}
                         </div>
                     </g:each>
                 </div>
@@ -244,9 +245,9 @@
     </g:form>
     <div id="addKeywordTemplate" style="display: none">
         <div>
-            <label for="keyword">Keyword:</label>
             <input id="keyword" name="keyword" type="text" value=""/>
-            <label>Category:</label>
+            <g:select name="category" from="${categories}" />
+            %{--
             <g:select name="category" from="${[
                     'Atmosphere', 'Chemical entity', 'Document',
                     'Environmental material', 'Equipment', 'Geographic location',
@@ -256,6 +257,7 @@
                     'Specification', 'Theme', 'Unknown', 'Water body', 'chemical process',
                     'dataCenter', 'dataResolution', 'dataset', 'discipline',
                     'instrument', 'place', 'platform', 'project', 'stratum', 'temporal', 'theme']}"/>
+                    --}%
             <button type="button" class="delete">Delete</button>
         </div>
     </div>

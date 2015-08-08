@@ -4,7 +4,6 @@ import com.mongodb.BasicDBList
 import com.mongodb.BasicDBObject
 import org.neuinfo.foundry.common.model.EntityInfo
 import org.neuinfo.foundry.common.model.Keyword
-import org.neuinfo.foundry.common.util.CategoryHierarchyHandler
 import org.neuinfo.foundry.common.util.FacetHierarchyHandler
 import org.neuinfo.foundry.common.util.IHierarchyHandler
 
@@ -345,7 +344,7 @@ class AnnotationController {
                 Set<String> categories = kw.getCategories()
                 if (categories.size() > 0) {
                     String category = kw.getTheCategory(chh)
-                    String cinergiCategory = chh.getCinergiCategory(category)
+                    String cinergiCategory = chh.getCinergiCategory(category.toLowerCase())
                     if (cinergiCategory) {
                         category = cinergiCategory;
                     }
@@ -388,8 +387,10 @@ class AnnotationController {
             }
         }
 
-        List<String> categories4DD = chh.getSortedCinergiCategories()
-        categories4DD.add(0, 'Unassigned')
+        List<String> categories4DD = new ArrayList<String>(chh.getSortedCinergiCategories())
+        if (categories4DD[0] != 'Unassigned') {
+            categories4DD.add(0, 'Unassigned')
+        }
 
         String sourceName = dw.sourceInfo.name
         String sourceID = dw.sourceInfo.sourceID
