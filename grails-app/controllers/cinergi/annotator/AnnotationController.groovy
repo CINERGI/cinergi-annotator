@@ -6,6 +6,9 @@ import org.neuinfo.foundry.common.model.EntityInfo
 import org.neuinfo.foundry.common.model.Keyword
 import org.neuinfo.foundry.common.util.FacetHierarchyHandler
 import org.neuinfo.foundry.common.util.IHierarchyHandler
+import org.neuinfo.foundry.common.util.ScigraphMappingsHandler
+import org.neuinfo.foundry.common.util.ScigraphMappingsHandler.FacetNode
+import org.neuinfo.foundry.common.util.ScigraphUtils
 
 class AnnotationController {
     def annotationService
@@ -326,7 +329,7 @@ class AnnotationController {
         //def keywords = result.Data.keywords
         def keywords = dw.data.keywords
         def categoryKwMap = [:]
-        IHierarchyHandler chh = FacetHierarchyHandler.getInstance();
+        // IHierarchyHandler chh = FacetHierarchyHandler.getInstance();
         // CategoryHierarchyHandler chh = CategoryHierarchyHandler.getInstance()
         idx = 1
         if (keywords) {
@@ -335,11 +338,33 @@ class AnnotationController {
             keywords.each { k ->
                 Keyword keyword = new Keyword(k.term)
                 for (eiRec in k.entityInfos) {
-                    EntityInfo ei = new EntityInfo(eiRec.contentLocation, eiRec.id, eiRec.start, eiRec.end, eiRec.category)
+                    EntityInfo ei = new EntityInfo(eiRec.contentLocation, eiRec.ontologyId, eiRec.start, eiRec.end, eiRec.category)
                     keyword.addEntityInfo(ei)
                 }
                 keywordList << keyword
             }
+            Set<KeywordInfo> uniqSet = new HashSet<KeywordInfo>()
+            keywordList.each { Keyword kw ->
+                for (String id : kw.getIds()) {
+                    List<List<FacetNode>> fnListList = ScigraphUtils.getKeywordFacetHierarchy(id)
+                    for (List<FacetNode> fnList : fnListList) {
+                        String category = ScigraphUtils.toCinergiCategory(fnList)
+                        List<KeywordInfo> kiList = categoryKwMap[category]
+                        if (!kiList) {
+                            kiList = new ArrayList<KeywordInfo>(5)
+                            categoryKwMap[category] = kiList
+                        }
+                        KeywordInfo ki =  new KeywordInfo(keyword: kw.getTerm(), category: category, id: idx)
+                        if (!uniqSet.contains(ki)) {
+                            kiList << ki
+                            uniqSet << ki
+                        }
+                        idx++
+                    }
+                }
+            }
+
+            /*
             keywordList.each { Keyword kw ->
                 Set<String> categories = kw.getCategories()
                 if (categories.size() > 0) {
@@ -357,6 +382,7 @@ class AnnotationController {
                     idx++
                 }
             }
+            */
             /*
             keywords.each { k ->
                 println "EntityInfo:>> " + k.entityInfos[0]
@@ -387,7 +413,8 @@ class AnnotationController {
             }
         }
 
-        List<String> categories4DD = new ArrayList<String>(chh.getSortedCinergiCategories())
+        // List<String> categories4DD = new ArrayList<String>(chh.getSortedCinergiCategories())
+        List<String> categories4DD = ScigraphMappingsHandler.getInstance().getSortedCinergiFacets()
         if (categories4DD[0] != 'Unassigned') {
             categories4DD.add(0, 'Unassigned')
         }

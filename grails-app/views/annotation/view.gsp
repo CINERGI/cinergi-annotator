@@ -175,7 +175,6 @@
                             <g:select name="category_${kw.id}" from="${categories}" value="${kw.category}"/>
                             %{--  <input id="category_${kw.id}" type="text" value="${kw.category}" readonly/> --}%
                             <button type="button" class="delete kwd" id="kwDelete_${kw.id}">Delete</button>
-                            ${kw.category}
                         </div>
                     </g:each>
                 </div>
