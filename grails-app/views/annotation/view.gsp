@@ -133,6 +133,8 @@
                 var form$ = $('#annotationForm')
                 form$.submit();
             });
+
+            $('#kwSave').prop('title','Not updated for new Keyword Enhancer changes yet!').prop('disabled',true);
         });
     </g:javascript>
 </head>
