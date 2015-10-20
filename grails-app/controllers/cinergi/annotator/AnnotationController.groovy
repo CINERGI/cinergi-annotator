@@ -354,7 +354,8 @@ class AnnotationController {
                             kiList = new ArrayList<KeywordInfo>(5)
                             categoryKwMap[category] = kiList
                         }
-                        KeywordInfo ki =  new KeywordInfo(keyword: kw.getTerm(), category: category, id: idx)
+                        KeywordInfo ki =  new KeywordInfo(keyword: kw.getTerm(), category: category, id: idx,
+                                ontologyId: id)
                         if (!uniqSet.contains(ki)) {
                             kiList << ki
                             uniqSet << ki

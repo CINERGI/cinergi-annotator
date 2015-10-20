@@ -11,6 +11,16 @@ class KeywordRec {
         map
     }
 
+    def removeByOntologyId(String ontologyId) {
+        def toBeRemoved = []
+        entityInfos.each { EntityInfoRec ei ->
+            if (ei.ontologyId == ontologyId) {
+                toBeRemoved << ei
+            }
+        }
+        toBeRemoved.each { EntityInfoRec ei -> entityInfos.remove(ei) }
+    }
+
     static embedded = ['entityInfos']
     static mapping = {
         version false

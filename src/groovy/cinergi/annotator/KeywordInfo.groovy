@@ -10,6 +10,7 @@ class KeywordInfo {
     int id
     String keyword
     String category
+    String ontologyId
 
     boolean equals(o) {
         if (this.is(o)) return true

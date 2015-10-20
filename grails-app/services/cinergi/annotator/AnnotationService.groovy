@@ -12,6 +12,7 @@ class AnnotationService {
     def getKeywords(String primaryKey) {
 
     }
+
     def findDocument(String primaryKey) {
         return DocWrapper.findByPrimaryKey(primaryKey)
     }
@@ -38,7 +39,10 @@ class AnnotationService {
                 }
                 if (kw2Del) {
                     keywordsUpdated = true
-                    dw.data.keywords.remove(kw2Del)
+                    kw2Del.removeByOntologyId(ki.ontologyId)
+                    if (!kw2Del.entityInfos) {
+                        dw.data.keywords.remove(kw2Del)
+                    }
                 }
             }
         }
@@ -54,6 +58,8 @@ class AnnotationService {
                 keywordsUpdated = true
             }
         }
+        /* update does not make sense anymore since ontologyId of the updated category/facet is not known.
+
         if (dataMap.updatedKeywords) {
             dataMap.updatedKeywords.values().each { KeywordInfo ki ->
                 pi.updatedKeywords << ki
@@ -64,6 +70,7 @@ class AnnotationService {
                 keywordsUpdated = true
             }
         }
+        */
         def order2BBRMap = [:]
         if (dw.data.spatial) {
             int idx = 1
