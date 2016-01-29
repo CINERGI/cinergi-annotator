@@ -4,8 +4,6 @@ import com.mongodb.BasicDBList
 import com.mongodb.BasicDBObject
 import org.neuinfo.foundry.common.model.EntityInfo
 import org.neuinfo.foundry.common.model.Keyword
-import org.neuinfo.foundry.common.util.FacetHierarchyHandler
-import org.neuinfo.foundry.common.util.IHierarchyHandler
 import org.neuinfo.foundry.common.util.ScigraphMappingsHandler
 import org.neuinfo.foundry.common.util.ScigraphMappingsHandler.FacetNode
 import org.neuinfo.foundry.common.util.ScigraphUtils
@@ -179,11 +177,9 @@ class AnnotationController {
     }
 
     def index() {
-        String primaryKey = '5a8c8834-b09e-47df-a5d5-053b9864229c'
-        primaryKey = 'f66c287b-7e22-4680-8020-15525aebbc7d'
-        String bbTestPrimaryKey = '505b9142e4b08c986b3197e9'
-        primaryKey = 'OT.092012.26913.2'
-        primaryKey = bbTestPrimaryKey
+        String primaryKey = null
+        //String bbTestPrimaryKey = '505b9142e4b08c986b3197e9'
+
         if (params.docId) {
             primaryKey = params.docId
         }
@@ -191,12 +187,9 @@ class AnnotationController {
         DocWrapper dw = annotationService.findDocument(primaryKey)
         assert dw
 
-        //String abstractTxt = result.OriginalDoc.'gmd:MD_Metadata'.'gmd:identificationInfo'
-        //        .'gmd:MD_DataIdentification'.'gmd:abstract'.'gco:CharacterString'.'_$'
-        def model = prepView(dw, primaryKey)
+        def model = prepView2(dw, primaryKey)
 
         render(view: "view", model: model)
-
     }
 
     private def depthFirst(parent, String label, list) {
@@ -230,6 +223,128 @@ class AnnotationController {
         def list = []
         depthFirst(node, '_$', list)
         return list ? list[0] : null
+    }
+
+    private def prepView2(DocWrapper dw, String primaryKey) {
+        String title = dw.originalDoc.'gmd:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:citation'?.'gmd:CI_Citation'?.'gmd:title'?.'gco:CharacterString'?.'_$'
+        String abstractTxt = dw.originalDoc.'gmd:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:abstract'?.'gco:CharacterString'?.'_$'
+        if (!abstractTxt) {
+            abstractTxt = dw.originalDoc.'MD_Metadata'?.'identificationInfo'?.'MD_DataIdentification'?.'abstract'?.'gco:CharacterString'?.'_$'
+        }
+        if (!title) {
+            title = dw.originalDoc.'MD_Metadata'?.'identificationInfo'?.'MD_DataIdentification'?.'citation'?.'CI_Citation'?.'title'?.'gco:CharacterString'?.'_$'
+        }
+        if (!title) {
+            title = dw.originalDoc.'gmi:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:citation'?.'gmd:CI_Citation'?.'gmd:title'?.'gco:CharacterString'?.'_$'
+        }
+        if (!abstractTxt) {
+            abstractTxt = dw.originalDoc.'gmi:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:abstract'?.'gco:CharacterString'?.'_$'
+        }
+
+        println "abstract:" + abstractTxt
+        println "title:" + title
+        int idx = 1
+        def boundingBoxes = dw.data.spatial?.boundingBoxes
+        List<BoundingBox> bbList = new ArrayList<>(5)
+        if (boundingBoxes) {
+            boundingBoxes.each { BoundingBoxRec b ->
+                String sl = b.southwest.lat
+                String wl = b.southwest.lng
+                String nl = b.northeast.lat
+                String el = b.northeast.lng
+                bbList << new BoundingBox(latSouth: sl, lngWest: wl, latNorth: nl, lngEast: el, id: idx, type: 'bb')
+                idx++
+            }
+        }
+        List<BoundingBox> derivedBoundingBoxes = dw.data.spatial?.derivedBoundingBoxesFromPlaces
+        if (derivedBoundingBoxes) {
+            derivedBoundingBoxes.each { BoundingBoxRec b ->
+                String sl = b.southwest.lat
+                String wl = b.southwest.lng
+                String nl = b.northeast.lat
+                String el = b.northeast.lng
+                bbList << new BoundingBox(latSouth: sl, lngWest: wl, latNorth: nl,
+                        lngEast: el, id: idx, type: 'dbb')
+                idx++
+            }
+        }
+        Map<String, BoundingBox> derivedPlaceBoundingBoxes = dw.data.spatial?.derivedBoundingBoxesFromDerivedPlace
+        if (derivedPlaceBoundingBoxes) {
+            derivedPlaceBoundingBoxes.each { String place, BoundingBoxRec b ->
+                String sl = b.southwest.lat
+                String wl = b.southwest.lng
+                String nl = b.northeast.lat
+                String el = b.northeast.lng
+                bbList << new BoundingBox(latSouth: sl, lngWest: wl, latNorth: nl,
+                        lngEast: el, id: idx, type: 'dpbb', text: place)
+                idx++
+            }
+        }
+        // enhanced keywords
+        List<KeywordInfo> keywordList = new ArrayList<KeywordInfo>()
+        if (dw.data.enhancedKeywords) {
+            dw.data.enhancedKeywords.each { EnhancedKeywordInfo eki ->
+                KeywordInfo ki = new KeywordInfo(keyword: eki.term, category: eki.category, id: idx,
+                        ontologyId: eki.ontologyId)
+                keywordList << ki
+                idx++
+            }
+        }
+
+        // for existing keywords
+        String keywordTag = 'gmd:keyword'
+        String keywordTypeCodeTag = 'gmd:MD_KeywordTypeCode'
+        def dkList = dw.originalDoc.'gmd:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:descriptiveKeywords'
+        if (!dkList) {
+            dkList = dw.originalDoc.'gmi:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:descriptiveKeywords'
+        }
+        if (!dkList) {
+            dkList = dw.originalDoc.'MD_Metadata'?.'identificationInfo'?.'MD_DataIdentification'?.'descriptiveKeywords'
+            keywordTag = 'keyword'
+            keywordTypeCodeTag = 'MD_KeywordTypeCode'
+        }
+        List<KeywordInfo> existingKeywords = prepExistingKeywords(dkList, keywordTag, keywordTypeCodeTag)
+
+        List<String> categories4DD = ScigraphMappingsHandler.getInstance().getSortedCinergiFacets()
+        if (categories4DD[0] != 'Unassigned') {
+            categories4DD.add(0, 'Unassigned')
+        }
+
+        String sourceName = dw.sourceInfo.name
+        String sourceID = dw.sourceInfo.sourceID
+        return ["bbList"          : bbList, "keywords": keywordList, 'abstractTxt': abstractTxt,
+                'docId'           : primaryKey, 'sourceName': sourceName, 'titleTxt': title,
+                "existingKeywords": existingKeywords, "sourceID": sourceID,
+                "categories"      : categories4DD]
+    }
+
+    private List<KeywordInfo> prepExistingKeywords(dkList, String keywordTag, String keywordTypeCodeTag) {
+        List<KeywordInfo> existingKeywords = new ArrayList<KeywordInfo>()
+        int allIdx = 1000
+        if (dkList) {
+            for (dk in dkList) {
+                def otherCitationDetailsList = []
+                depthFirst(dk, 'gmd:otherCitationDetails', otherCitationDetailsList)
+                if (!otherCitationDetailsList) {
+                    def kList = [], typeList = []
+                    depthFirst(dk, keywordTag, kList)
+                    if (kList) {
+                        depthFirst(dk, keywordTypeCodeTag, typeList)
+                        String type = getText(typeList[0])
+                        if (type) {
+                            println "type:$type"
+                            kList.each { kn ->
+                                String k = getText(kn);
+                                println k
+                                KeywordInfo ki = new KeywordInfo(keyword: k, category: type, id: allIdx++)
+                                existingKeywords << ki
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return existingKeywords
     }
 
     private def prepView(DocWrapper dw, String primaryKey) {
@@ -354,7 +469,7 @@ class AnnotationController {
                             kiList = new ArrayList<KeywordInfo>(5)
                             categoryKwMap[category] = kiList
                         }
-                        KeywordInfo ki =  new KeywordInfo(keyword: kw.getTerm(), category: category, id: idx,
+                        KeywordInfo ki = new KeywordInfo(keyword: kw.getTerm(), category: category, id: idx,
                                 ontologyId: id)
                         if (!uniqSet.contains(ki)) {
                             kiList << ki

@@ -7,7 +7,8 @@ class DataRec {
     Map metaData
     Spatial spatial
     List<KeywordRec> keywords
-    static embedded = ['keywords','spatial']
+    List<EnhancedKeywordInfo> enhancedKeywords
+    static embedded = ['keywords','spatial','enhancedKeywords']
     static mapping = {
         version false
     }
