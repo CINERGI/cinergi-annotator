@@ -14,6 +14,7 @@ class SourceController {
     def showSources() {
         params.max = Math.min(params.max ? params.int('max') : 10, 100)
         params.offset = Math.max(params.offset ? params.int('offset') : 0, 0)
+        boolean enhancedOnly = params.enhancedOnesOnly
         int totCount = 0
         String selectedSource = null
         if (params.selectedSourceId) {
@@ -42,17 +43,33 @@ class SourceController {
         if (params.totCount) {
             totCount = params.int('totCount')
         } else {
-            totCount = DocWrapper.collection.count(['SourceInfo.SourceID': sourceInfo.resourceId,
-                                                    'Processing.status'  : 'finished'])
+            if (enhancedOnly) {
+                totCount = DocWrapper.collection.count(['SourceInfo.SourceID': sourceInfo.resourceId,
+                                                        'Processing.status'  : 'finished',
+                                                        $exists              : 'Data.enhancedKeywords'])
+            } else {
+                totCount = DocWrapper.collection.count(['SourceInfo.SourceID': sourceInfo.resourceId,
+                                                        'Processing.status'  : 'finished'])
+            }
         }
-        DocWrapper.collection.find(['SourceInfo.SourceID': sourceInfo.resourceId,
-                                    'Processing.status'  : 'finished'],
-                ['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
-            // println dw
-            dwList << dw
+        if (enhancedOnly) {
+            DocWrapper.collection.find(['SourceInfo.SourceID': sourceInfo.resourceId,
+                                        'Processing.status'  : 'finished',
+                                        $exists              : 'Data.enhancedKeywords'],
+                    ['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
+                dwList << dw
+            }
+        } else {
+            DocWrapper.collection.find(['SourceInfo.SourceID': sourceInfo.resourceId,
+                                        'Processing.status'  : 'finished'],
+                    ['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
+                // println dw
+                dwList << dw
+            }
         }
         render(view: 'view', model: ['siList'        : siList, 'dwList': dwList, 'totCount': totCount,
                                      'selectedSource': selectedSource])
 
     }
+
 }
