@@ -8,7 +8,8 @@ class DataRec {
     Spatial spatial
     List<KeywordRec> keywords
     List<EnhancedKeywordInfo> enhancedKeywords
-    static embedded = ['keywords','spatial','enhancedKeywords']
+    List<AnnotatedKeywordRec> annotatedKeywords
+    static embedded = ['keywords','spatial','enhancedKeywords','annotatedKeywords']
     static mapping = {
         version false
     }

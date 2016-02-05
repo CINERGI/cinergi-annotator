@@ -27,50 +27,8 @@ class AnnotationService {
     }
 
     def updateDocumentEnhancements(DocWrapper dw, ProvenanceInfo pi, dataMap, String username) {
-        boolean keywordsUpdated = false
-        if (dataMap.deletedKeywords) {
-            dataMap.deletedKeywords.values().each { KeywordInfo ki ->
-                KeywordRec kw2Del = null
-                dw.data.keywords.each { KeywordRec kw ->
-                    if (kw.term.equals(ki.keyword)) {
-                        kw2Del = kw
-                        pi.deletedKeywords << ki
-                    }
-                }
-                if (kw2Del) {
-                    keywordsUpdated = true
-                    kw2Del.removeByOntologyId(ki.ontologyId)
-                    if (!kw2Del.entityInfos) {
-                        dw.data.keywords.remove(kw2Del)
-                    }
-                }
-            }
-        }
-        if (dataMap.newKeywords) {
-            dataMap.newKeywords.values().each { KeywordInfo ki ->
-                pi.newKeywords << ki
-                KeywordRec kw = new KeywordRec(term: ki.keyword)
-                EntityInfoRec eir = new EntityInfoRec(category: ki.category, ontologyId: 'user-annotation',
-                        start: -1, end: -1, contentLocation: 'N/A')
-                kw.entityInfos = []
-                kw.entityInfos.add(eir)
-                dw.data.keywords.add(kw)
-                keywordsUpdated = true
-            }
-        }
-        /* update does not make sense anymore since ontologyId of the updated category/facet is not known.
-
-        if (dataMap.updatedKeywords) {
-            dataMap.updatedKeywords.values().each { KeywordInfo ki ->
-                pi.updatedKeywords << ki
-                KeywordRec oldKW = dw.data.keywords[ki.id - 1]
-                assert oldKW
-                oldKW.term = ki.keyword
-                oldKW.entityInfos[0].category = ki.category
-                keywordsUpdated = true
-            }
-        }
-        */
+        //boolean keywordsUpdated = prepChangedKeywords(dataMap, dw, pi)
+        boolean keywordsUpdated = prepAnnotatedKeywords(dataMap, dw, pi, username)
         def order2BBRMap = [:]
         if (dw.data.spatial) {
             int idx = 1
@@ -157,6 +115,117 @@ class AnnotationService {
         }
 
         return dw
+    }
+
+    def boolean prepAnnotatedKeywords(dataMap, DocWrapper dw, ProvenanceInfo pi, String username) {
+        boolean keywordsUpdated = false
+        Date now = new Date()
+        if (dataMap.deletedKeywords) {
+            dataMap.deletedKeywords.values().each { KeywordInfo ki ->
+                KeywordRec kw2Del = null
+                dw.data.enhancedKeywords.each { EnhancedKeywordInfo kw ->
+                    if (kw.term.equals(ki.keyword)) {
+                        kw2Del = kw
+                        pi.deletedKeywords << ki
+                    }
+                }
+                if (kw2Del) {
+                    keywordsUpdated = true
+                    dw.data.enhancedKeywords.remove(kw2Del)
+                    AnnotatedKeywordRec akr = new AnnotatedKeywordRec(annotationAction: 'deleted', oldTerm: ki.keyword,
+                            oldCategory: ki.category, ontologyId: ki.ontologyId, annotator: username,
+                            lastChangedDate: now)
+                    dw.data.annotatedKeywords << akr
+                }
+            }
+        }
+        if (dataMap.newKeywords) {
+            dataMap.newKeywords.values().each { KeywordInfo ki ->
+                pi.newKeywords << ki
+                KeywordRec kw = new KeywordRec(term: ki.keyword)
+                EntityInfoRec eir = new EntityInfoRec(category: ki.category, ontologyId: 'user-annotation',
+                        start: -1, end: -1, contentLocation: 'N/A')
+                kw.entityInfos = []
+                kw.entityInfos.add(eir)
+                dw.data.keywords.add(kw)
+                EnhancedKeywordInfo eki = new EnhancedKeywordInfo(term: ki.keyword, category: ki.category,
+                        ontologyId: ki.ontologyId, type: 'Keyword')
+                dw.data.enhancedKeywords << eki
+                AnnotatedKeywordRec akr = new AnnotatedKeywordRec(annotationAction: 'new', newTerm: ki.keyword,
+                        newCategory: ki.category, ontologyId: ki.ontologyId, annotator: username,
+                        lastChangedDate: now)
+                dw.data.annotatedKeywords << akr
+
+                keywordsUpdated = true
+            }
+        }
+        if (dataMap.updatedKeywords) {
+            dataMap.updatedKeywords.values().each { KeywordInfo ki ->
+                def matchedOrig = dw.data.enhancedKeywords.grep({ EnhancedKeywordInfo eki -> eki.ontologyId == ki.ontologyId })
+                if (matchedOrig) {
+                    pi.updatedKeywords << ki
+                    EnhancedKeywordInfo oldEKI = matchedOrig[0]
+                    AnnotatedKeywordRec akr = new AnnotatedKeywordRec(annotationAction: 'updated',
+                            oldTerm: oldEKI.term, oldCategory: oldEKI.category,
+                            newTerm: ki.keyword, newCategory: ki.category, ontologyId: ki.ontologyId,
+                            annotator: username,
+                            lastChangedDate: now)
+                    dw.data.annotatedKeywords << akr
+                    oldEKI.term = ki.keyword
+                    oldEKI.category = ki.category
+                    keywordsUpdated = true
+                }
+            }
+        }
+        return keywordsUpdated
+    }
+
+    def boolean prepChangedKeywords(dataMap, dw, pi) {
+        boolean keywordsUpdated = false
+        if (dataMap.deletedKeywords) {
+            dataMap.deletedKeywords.values().each { KeywordInfo ki ->
+                KeywordRec kw2Del = null
+                dw.data.keywords.each { KeywordRec kw ->
+                    if (kw.term.equals(ki.keyword)) {
+                        kw2Del = kw
+                        pi.deletedKeywords << ki
+                    }
+                }
+                if (kw2Del) {
+                    keywordsUpdated = true
+                    kw2Del.removeByOntologyId(ki.ontologyId)
+                    if (!kw2Del.entityInfos) {
+                        dw.data.keywords.remove(kw2Del)
+                    }
+                }
+            }
+        }
+        if (dataMap.newKeywords) {
+            dataMap.newKeywords.values().each { KeywordInfo ki ->
+                pi.newKeywords << ki
+                KeywordRec kw = new KeywordRec(term: ki.keyword)
+                EntityInfoRec eir = new EntityInfoRec(category: ki.category, ontologyId: 'user-annotation',
+                        start: -1, end: -1, contentLocation: 'N/A')
+                kw.entityInfos = []
+                kw.entityInfos.add(eir)
+                dw.data.keywords.add(kw)
+                keywordsUpdated = true
+            }
+        }
+        /* update does not make sense anymore since ontologyId of the updated category/facet is not known.
+
+        if (dataMap.updatedKeywords) {
+            dataMap.updatedKeywords.values().each { KeywordInfo ki ->
+                pi.updatedKeywords << ki
+                KeywordRec oldKW = dw.data.keywords[ki.id - 1]
+                assert oldKW
+                oldKW.term = ki.keyword
+                oldKW.entityInfos[0].category = ki.category
+                keywordsUpdated = true
+            }
+        }
+        */
+        keywordsUpdated
     }
 
     private static BoundingBox find(BoundingBox bbRef, List<BoundingBoxRec> bbrList) {
