@@ -1,6 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<!DOCTYPE html>
 <html>
 <head>
+    <meta name="layout" content="main"/>
     <title>Annotation Summary</title>
     <g:javascript library="jquery"/>
     <style>
@@ -40,24 +42,38 @@
             <thead>
             <th>Source</th>
             <th>Doc ID</th>
-            <th>Action</th>
-            <th>Old Term</th>
-            <th>Old Category</th>
-            <th>New Term</th>
-            <th>New Category</th>
+
 
             </thead>
             <tbody>
             <g:each in="${dwList}" status="i" var="dw">
                 <tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
-                    <td>${dw.sourceInfo.name}</td>
+                    <td>${dw.SourceInfo.Name}</td>
                     <td>
                         ${dw.primaryKey}
                     </td>
-                    <td>
-                        ${dw.data.annotatedKeywords[0].oldTerm}
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <table style="width: 100%; table-layout: fixed;">
+                            <thead>
+                            <th>Action</th>
+                            <th>Old Term</th>
+                            <th>Old Category</th>
+                            <th>New Term</th>
+                            <th>New Category</th>
+                            </thead>
+                            <g:each in="${dw.Data.annotatedKeywords}" status="j" var="ak">
+                                <tr>
+                                    <td>${ak.annotationAction}</td>
+                                    <td>${ak.oldTerm}</td>
+                                    <td>${ak.oldCategory}</td>
+                                    <td>${ak.newTerm}</td>
+                                    <td>${ak.newCategory}</td>
+                                </tr>
+                            </g:each>
+                        </table>
                     </td>
-
                 </tr>
             </g:each>
             </tbody>

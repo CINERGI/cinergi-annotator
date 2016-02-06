@@ -19,7 +19,7 @@ class AnnotationSummaryController {
             totCount = params.int('totCount')
         } else {
             totCount = DocWrapper.collection.count(['Processing.status'    : 'finished',
-                                                    'Data.enhancedKeywords': [$exists: 1]])
+                                                    'Data.annotatedKeywords': [$exists: 1]])
         }
         def dwList = []
         DocWrapper.collection.find(['Processing.status'     : 'finished',
