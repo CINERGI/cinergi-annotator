@@ -14,7 +14,7 @@ class SourceController {
     def showSources() {
         params.max = Math.min(params.max ? params.int('max') : 10, 100)
         params.offset = Math.max(params.offset ? params.int('offset') : 0, 0)
-        boolean enhancedOnly = params.enhancedOnesOnly
+        boolean enhancedOnly = params.enhancedOnly ?: false
         int totCount = 0
         String selectedSource = null
         if (params.selectedSourceId) {
@@ -44,31 +44,34 @@ class SourceController {
             totCount = params.int('totCount')
         } else {
             if (enhancedOnly) {
-                totCount = DocWrapper.collection.count(['SourceInfo.SourceID': sourceInfo.resourceId,
-                                                        'Processing.status'  : 'finished',
-                                                        $exists              : 'Data.enhancedKeywords'])
+                totCount = DocWrapper.collection.count(['SourceInfo.SourceID'  : sourceInfo.resourceId,
+                                                        'Processing.status'    : 'finished',
+                                                        'Data.enhancedKeywords': [$exists: 1]])
             } else {
                 totCount = DocWrapper.collection.count(['SourceInfo.SourceID': sourceInfo.resourceId,
                                                         'Processing.status'  : 'finished'])
             }
         }
         if (enhancedOnly) {
-            DocWrapper.collection.find(['SourceInfo.SourceID': sourceInfo.resourceId,
-                                        'Processing.status'  : 'finished',
-                                        $exists              : 'Data.enhancedKeywords'],
-                    ['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
+            DocWrapper.collection.find(['SourceInfo.SourceID'  : sourceInfo.resourceId,
+                                        'Processing.status'    : 'finished',
+                                        'Data.enhancedKeywords': [$exists: 1]],
+                    ['primaryKey': 1]).sort(['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
                 dwList << dw
             }
         } else {
             DocWrapper.collection.find(['SourceInfo.SourceID': sourceInfo.resourceId,
                                         'Processing.status'  : 'finished'],
-                    ['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
+                    ['primaryKey': 1]).sort(['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
                 // println dw
                 dwList << dw
             }
         }
+
+       // println "dwList.size:" + dwList.size()
+       // println "totalCount:" + totCount
         render(view: 'view', model: ['siList'        : siList, 'dwList': dwList, 'totCount': totCount,
-                                     'selectedSource': selectedSource])
+                                     'selectedSource': selectedSource, enhancedOnly: enhancedOnly])
 
     }
 

@@ -33,9 +33,10 @@
     <ul>
         <li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
         <g:if test="${session?.user}">
-            %{--
-            <li><g:link class="list" controller="EntryForm" action="index">Entry Form</g:link></li>
-            --}%
+        %{--
+        <li><g:link class="list" controller="EntryForm" action="index">Entry Form</g:link></li>
+        --}%
+            <li><g:link class="list" controller="AnnotationSummary" action="show">Annotations</g:link></li>
             <li><g:link class="list" controller="User" action="logout"><g:message code="Logout"
                                                                                   args="[entityName]"/></g:link></li>
         </g:if>
@@ -46,8 +47,14 @@
     <div style="margin:5px;">
         <g:form action="showSources">
             <input type="hidden" id="selectedSourceId" name="selectedSourceId" value="${selectedSource}"/>
-            <g:select id="selectedSource" name="selectedSource" from="${siList}"
-                      optionKey="resourceId" optionValue="name" value="${selectedSource}"/>
+
+            <div>
+                <g:select id="selectedSource" name="selectedSource" from="${siList}"
+                          optionKey="resourceId" optionValue="name" value="${selectedSource}"/>
+                <label for="enhancedOnly">Enhanced Ones Only</label>
+                <g:checkBox name="enhancedOnly" value="${enhancedOnly}"/>
+                <g:actionSubmit value="Filter" action="showSources" />
+            </div>
         </g:form>
     </div>
     <table style="width: 100%; table-layout: fixed;">
@@ -70,7 +77,7 @@
         <tfoot>
         <div class="paginateButtons">
             <g:paginate total="${totCount}"
-                        params="${[totCount: totCount, selectedSource:selectedSource]}"/>
+                        params="${[totCount: totCount, selectedSource: selectedSource]}"/>
         </div>
         </tfoot>
     </table>

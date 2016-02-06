@@ -89,7 +89,11 @@ class AnnotationService {
             def updateMap = [:]
             if (keywordsUpdated) {
                 def keywordsCol = dw.data.keywords.collect { KeywordRec kw -> kw.toMap() }
+                def enhancedKeywordsCol = dw.data.enhancedKeywords.collect { EnhancedKeywordInfo eki -> eki.toMap() }
+                def annotatedKeywordsCol = dw.data.annotatedKeywords.collect { AnnotatedKeywordRec akr -> akr.toMap() }
                 updateMap['Data.keywords'] = keywordsCol
+                updateMap['Data.enhancedKeywords'] = enhancedKeywordsCol
+                updateMap['Data.annotatedKeywords'] = annotatedKeywordsCol
                 //DocWrapper.collection.update(['_id': dw.id], [$set: ['Data.keywords': keywordsCol]])
             }
             if (bbUpdated) {
@@ -97,7 +101,7 @@ class AnnotationService {
                 // DocWrapper.collection.update(['_id': dw.id],
                 //         [$set: ['Data.spatial': dw.data.spatial.toMap()]])
             }
-            updateMap['Processing.status'] = 'annotated.1'
+            // updateMap['Processing.status'] = 'annotated.1'
             DocWrapper.collection.update(['_id': dw.id], [$set: updateMap])
 
             if (dw.history.prov) {
@@ -122,7 +126,7 @@ class AnnotationService {
         Date now = new Date()
         if (dataMap.deletedKeywords) {
             dataMap.deletedKeywords.values().each { KeywordInfo ki ->
-                KeywordRec kw2Del = null
+                EnhancedKeywordInfo kw2Del = null
                 dw.data.enhancedKeywords.each { EnhancedKeywordInfo kw ->
                     if (kw.term.equals(ki.keyword)) {
                         kw2Del = kw

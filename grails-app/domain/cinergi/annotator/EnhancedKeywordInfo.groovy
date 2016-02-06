@@ -8,6 +8,11 @@ class EnhancedKeywordInfo {
     // BindingFormat('yyyy-MM-dd\'T\'HH:mm:ss\'Z\'')
     String lastChangedDate
 
+    def toMap() {
+        def map = ['term'           : term, 'category': category, 'type': type, 'ontologyId': ontologyId,
+                   'lastChangedDate': lastChangedDate]
+        map
+    }
     static constraints = {
     }
 

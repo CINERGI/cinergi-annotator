@@ -39,7 +39,7 @@ class AnnotationController {
         String primaryKey = params.docId
         DocWrapper dw = annotationService.findDocument(primaryKey)
         assert dw
-        def curModel = prepView(dw, primaryKey)
+        def curModel = prepView2(dw, primaryKey)
         def newKeywords = [:]
         def updatedKeywords = [:]
         def deletedKeywords = [:]
@@ -171,7 +171,7 @@ class AnnotationController {
         def map = ['newKeywords': newKeywords, 'newBBs': newBBs, 'updatedKeywords': updatedKeywords,
                    'updatedBBs' : updatedBBs, 'deletedKeywords': deletedKeywords, 'deletedBBs': deletedBBs]
         def updateDW = annotationService.updateDocumentEnhancements(dw, pi, map, session.user.username)
-        def model = prepView(updateDW, primaryKey)
+        def model = prepView2(updateDW, primaryKey)
 
         render(view: "view", model: model)
     }
