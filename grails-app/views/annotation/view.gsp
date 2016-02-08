@@ -144,7 +144,8 @@
     <ul>
         <li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
         <g:if test="${session?.user}">
-            <li><g:link class="list" controller="source" action="showSources" params="${[selectedSource: sourceID]}">Sources</g:link></li>
+            <li><g:link class="list" controller="source" action="showSources"
+                        params="${[selectedSource: sourceID, enhancedOnly: enhancedOnly]}">Sources</g:link></li>
             <li><g:link class="list" controller="User" action="logout">Logout</g:link></li>
         </g:if>
     </ul>

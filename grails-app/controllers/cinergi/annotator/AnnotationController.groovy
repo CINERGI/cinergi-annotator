@@ -36,6 +36,7 @@ class AnnotationController {
 
     def saveAnnotations() {
         println params
+        boolean enhancedOnly = params.enhancedOnly ? params.enhancedOnly : false
         String primaryKey = params.docId
         DocWrapper dw = annotationService.findDocument(primaryKey)
         assert dw
@@ -172,14 +173,14 @@ class AnnotationController {
                    'updatedBBs' : updatedBBs, 'deletedKeywords': deletedKeywords, 'deletedBBs': deletedBBs]
         def updateDW = annotationService.updateDocumentEnhancements(dw, pi, map, session.user.username)
         def model = prepView2(updateDW, primaryKey)
-
+        model.enhancedOnly = enhancedOnly
         render(view: "view", model: model)
     }
 
     def index() {
         String primaryKey = null
         //String bbTestPrimaryKey = '505b9142e4b08c986b3197e9'
-
+        boolean enhancedOnly = params.enhancedOnly ? params.enhancedOnly : false
         if (params.docId) {
             primaryKey = params.docId
         }
@@ -188,6 +189,7 @@ class AnnotationController {
         assert dw
 
         def model = prepView2(dw, primaryKey)
+        model.enhancedOnly = enhancedOnly
 
         render(view: "view", model: model)
     }

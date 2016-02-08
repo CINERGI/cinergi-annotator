@@ -69,7 +69,7 @@
                     ${dw.primaryKey}
                 </td>
                 <td style="width:85px;">
-                    <g:link controller="Annotation" action="index" params="${[docId: dw.primaryKey]}">Annotate</g:link>
+                    <g:link controller="Annotation" action="index" params="${[docId: dw.primaryKey, enhancedOnly: enhancedOnly]}">Annotate</g:link>
                 </td>
             </tr>
         </g:each>

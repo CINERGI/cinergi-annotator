@@ -16,6 +16,10 @@
         padding-left: 5px;
     }
 
+    .t2h {
+        font-style: normal;
+    }
+
     </style>
 </head>
 
@@ -27,6 +31,7 @@
         %{--
         <li><g:link class="list" controller="EntryForm" action="index">Entry Form</g:link></li>
         --}%
+            <li><g:link class="list" controller="source" action="showSources">Sources</g:link></li>
             <li><g:link class="list" controller="User" action="logout"><g:message code="Logout"
                                                                                   args="[entityName]"/></g:link></li>
         </g:if>
@@ -35,14 +40,13 @@
 
 <div class="main">
     <div style="margin:5px;">
-        <g:form action="show">
-
+        <g:form action="asCSV">
+            <input type="submit" value="Export As CSV">
         </g:form>
         <table style="width: 100%; table-layout: fixed;">
             <thead>
             <th>Source</th>
             <th>Doc ID</th>
-
 
             </thead>
             <tbody>
@@ -57,11 +61,11 @@
                     <td colspan="2">
                         <table style="width: 100%; table-layout: fixed;">
                             <thead>
-                            <th>Action</th>
-                            <th>Old Term</th>
-                            <th>Old Category</th>
-                            <th>New Term</th>
-                            <th>New Category</th>
+                            <th class="t2h">Action</th>
+                            <th class="t2h">Old Term</th>
+                            <th class="t2h">Old Category</th>
+                            <th class="t2h">New Term</th>
+                            <th class="t2h">New Category</th>
                             </thead>
                             <g:each in="${dw.Data.annotatedKeywords}" status="j" var="ak">
                                 <tr>
@@ -77,12 +81,12 @@
                 </tr>
             </g:each>
             </tbody>
-         <tfoot>
-        <div class="paginateButtons">
-            <g:paginate total="${totCount}"
-                        params="${[totCount: totCount]}"/>
-        </div>
-        </tfoot>
+            <tfoot>
+            <div class="paginateButtons">
+                <g:paginate total="${totCount}"
+                            params="${[totCount: totCount]}"/>
+            </div>
+            </tfoot>
         </table>
     </div>
 
