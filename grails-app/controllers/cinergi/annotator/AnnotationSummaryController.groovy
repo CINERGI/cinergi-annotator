@@ -13,7 +13,7 @@ class AnnotationSummaryController {
 
     def asCSV() {
         StringBuilder sb = new StringBuilder(64000)
-        sb.append('Source Name,Document ID,Action,Old Term,Old Category, New Term, New Category, Update Date, Annotator\n' )
+        sb.append('Source Name,Document ID,Action,Ontology ID,Old Term,Old Category, New Term, New Category, Update Date, Annotator\n' )
         DocWrapper.collection.find(['Processing.status'     : 'finished',
                                     'Data.annotatedKeywords': [$exists: 1]],
                 ['primaryKey': 1, 'SourceInfo': 1, 'Data.annotatedKeywords': 1])
@@ -24,6 +24,7 @@ class AnnotationSummaryController {
                 wrap(resourceName, sb)
                 wrap(pk, sb)
                 wrap(akr.annotationAction, sb)
+                wrap(akr.ontologyId, sb)
                 wrap(akr.oldTerm, sb)
                 wrap(akr.oldCategory, sb)
                 wrap(akr.newTerm, sb)
