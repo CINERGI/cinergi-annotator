@@ -14,7 +14,7 @@ class SourceController {
     def showSources() {
         params.max = Math.min(params.max ? params.int('max') : 10, 100)
         params.offset = Math.max(params.offset ? params.int('offset') : 0, 0)
-        boolean enhancedOnly = params.enhancedOnly ?: false
+        boolean enhancedOnly = params.enhancedOnly ? Boolean.parseBoolean(params.enhancedOnly) : false
         int totCount = 0
         String selectedSource = null
         if (params.selectedSourceId) {
@@ -64,7 +64,7 @@ class SourceController {
                 DocWrapper.collection.find(['SourceInfo.SourceID'  : sourceInfo.resourceId,
                                             'Processing.status'    : 'finished',
                                             'Data.enhancedKeywords': [$exists: 1]],
-                        ['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
+                        ['primaryKey': 1]).sort(['primaryKey':1]).limit(params.max).skip(params.offset).each { dw ->
                     dwList << dw
                 }
             }
