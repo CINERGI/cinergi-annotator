@@ -36,7 +36,7 @@ class AnnotationController {
 
     def saveAnnotations() {
         println params
-        boolean enhancedOnly = params.enhancedOnly ? params.enhancedOnly : false
+        boolean enhancedOnly = params.enhancedOnly ? Boolean.parseBoolean(params.enhancedOnly) : false
         String primaryKey = params.docId
         DocWrapper dw = annotationService.findDocument(primaryKey)
         assert dw
@@ -180,7 +180,7 @@ class AnnotationController {
     def index() {
         String primaryKey = null
         //String bbTestPrimaryKey = '505b9142e4b08c986b3197e9'
-        boolean enhancedOnly = params.enhancedOnly ? params.enhancedOnly : false
+        boolean enhancedOnly = params.enhancedOnly ? Boolean.parseBoolean(params.enhancedOnly) : false
         if (params.docId) {
             primaryKey = params.docId
         }
