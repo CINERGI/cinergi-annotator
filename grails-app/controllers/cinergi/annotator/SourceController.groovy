@@ -53,23 +53,40 @@ class SourceController {
             }
         }
         if (enhancedOnly) {
-            DocWrapper.collection.find(['SourceInfo.SourceID'  : sourceInfo.resourceId,
-                                        'Processing.status'    : 'finished',
-                                        'Data.enhancedKeywords': [$exists: 1]],
-                    ['primaryKey': 1]).sort(['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
-                dwList << dw
+            if (sourceInfo.resourceId in ['cinergi-0001', 'cinergi-0018']) {
+                DocWrapper.collection.find(['SourceInfo.SourceID'  : sourceInfo.resourceId,
+                                            'Processing.status'    : 'finished',
+                                            'Data.enhancedKeywords': [$exists: 1]],
+                        ['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
+                    dwList << dw
+                }
+            } else {
+                DocWrapper.collection.find(['SourceInfo.SourceID'  : sourceInfo.resourceId,
+                                            'Processing.status'    : 'finished',
+                                            'Data.enhancedKeywords': [$exists: 1]],
+                        ['primaryKey': 1]).sort(['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
+                    dwList << dw
+                }
             }
         } else {
-            DocWrapper.collection.find(['SourceInfo.SourceID': sourceInfo.resourceId,
-                                        'Processing.status'  : 'finished'],
-                    ['primaryKey': 1]).sort(['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
-                // println dw
-                dwList << dw
+            if (sourceInfo.resourceId in ['cinergi-0001', 'cinergi-0018']) {
+                // big data sets cannot sort
+                DocWrapper.collection.find(['SourceInfo.SourceID': sourceInfo.resourceId,
+                                            'Processing.status'  : 'finished'],
+                        ['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
+                    dwList << dw
+                }
+            } else {
+                DocWrapper.collection.find(['SourceInfo.SourceID': sourceInfo.resourceId,
+                                            'Processing.status'  : 'finished'],
+                        ['primaryKey': 1]).sort(['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
+                    dwList << dw
+                }
             }
         }
 
-       // println "dwList.size:" + dwList.size()
-       // println "totalCount:" + totCount
+        // println "dwList.size:" + dwList.size()
+        // println "totalCount:" + totCount
         render(view: 'view', model: ['siList'        : siList, 'dwList': dwList, 'totCount': totCount,
                                      'selectedSource': selectedSource, enhancedOnly: enhancedOnly])
 
