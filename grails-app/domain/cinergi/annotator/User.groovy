@@ -18,7 +18,6 @@ class User {
     }
     static mapping = {
         collection "users"
-        database "discotest"
         username index:true
         version false
     }

@@ -22,7 +22,6 @@ class DocWrapper {
     }
     static mapping = {
         collection "records"
-        database "discotest"
         primaryKey index: true
         version false
         crawlDate attr: "CrawlDate"

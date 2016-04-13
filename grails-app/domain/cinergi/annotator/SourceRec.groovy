@@ -11,7 +11,6 @@ class SourceRec {
     }
     static mapping = {
         collection "sources"
-        database "discotest"
         version false
     }
 }

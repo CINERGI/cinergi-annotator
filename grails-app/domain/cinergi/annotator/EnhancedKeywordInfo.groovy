@@ -19,6 +19,5 @@ class EnhancedKeywordInfo {
     static mapping = {
         version false
         ontologyId attr: "id"
-
     }
 }
