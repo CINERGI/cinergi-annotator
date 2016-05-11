@@ -228,6 +228,7 @@ class AnnotationController {
     }
 
     private def prepView2(DocWrapper dw, String primaryKey) {
+        println "primaryKey: $primaryKey"
         String title = dw.originalDoc.'gmd:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:citation'?.'gmd:CI_Citation'?.'gmd:title'?.'gco:CharacterString'?.'_$'
         String abstractTxt = dw.originalDoc.'gmd:MD_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:abstract'?.'gco:CharacterString'?.'_$'
         if (!abstractTxt) {
@@ -237,10 +238,20 @@ class AnnotationController {
             title = dw.originalDoc.'MD_Metadata'?.'identificationInfo'?.'MD_DataIdentification'?.'citation'?.'CI_Citation'?.'title'?.'gco:CharacterString'?.'_$'
         }
         if (!title) {
-            title = dw.originalDoc.'gmi:MI_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:citation'?.'gmd:CI_Citation'?.'gmd:title'?.'gco:CharacterString'?.'_$'
+            try {
+                title = dw.originalDoc.'gmi:MI_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:citation'?.'gmd:CI_Citation'?.'gmd:title'?.'gco:CharacterString'?.'_$'
+            } catch(Throwable t) {
+                t.printStackTrace()
+                title = null
+            }
         }
         if (!abstractTxt) {
-            abstractTxt = dw.originalDoc.'gmi:MI_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:abstract'?.'gco:CharacterString'?.'_$'
+            try {
+                abstractTxt = dw.originalDoc.'gmi:MI_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:abstract'?.'gco:CharacterString'?.'_$'
+            } catch(Throwable t) {
+                t.printStackTrace()
+                abstractTxt = null
+            }
         }
 
         println "abstract:" + abstractTxt

@@ -16,7 +16,7 @@ class UserController {
             return false
         }
         if (params.docId) {
-            redirect(controller: 'Annotation', action: 'index')
+            redirect(controller: 'Annotation', action: 'index', params: params)
         } else {
             redirect(controller: 'Source', action: 'showSources')
         }
