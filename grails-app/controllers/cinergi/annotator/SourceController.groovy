@@ -16,6 +16,7 @@ class SourceController {
         params.offset = Math.max(params.offset ? params.int('offset') : 0, 0)
         boolean enhancedOnly = params.enhancedOnly ? Boolean.parseBoolean(params.enhancedOnly) : false
         int totCount = 0
+        String allow = session.user.allow
         String selectedSource = null
         if (params.selectedSourceId) {
             // coming from source change
@@ -24,7 +25,13 @@ class SourceController {
             selectedSource = params.selectedSource
         }
 
-        def list = sourceService.findAllSources()
+
+        def list = null;
+        if (allow) {
+            list = sourceService.findSources(allow)
+        } else {
+            list = sourceService.findAllSources()
+        }
         List<SourceInfo> siList = new ArrayList<SourceInfo>(10)
         list.each { SourceRec sr ->
             SourceInfo si = new SourceInfo(resourceId: sr.sourceInformation.resourceID,
@@ -64,7 +71,7 @@ class SourceController {
                 DocWrapper.collection.find(['SourceInfo.SourceID'  : sourceInfo.resourceId,
                                             'Processing.status'    : 'finished',
                                             'Data.enhancedKeywords': [$exists: 1]],
-                        ['primaryKey': 1]).sort(['primaryKey':1]).limit(params.max).skip(params.offset).each { dw ->
+                        ['primaryKey': 1]).sort(['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
                     dwList << dw
                 }
             }

@@ -43,15 +43,22 @@
     <g:javascript>
         $(function () {
             function initializeMap(sl, wl, nl, el, mapCanvasId) {
-
+                sl = parseFloat(sl);
+                wl = parseFloat(wl);
+                el = parseFloat(el);
+                nl = parseFloat(nl);
                 var bounds = new google.maps.LatLngBounds(
                         new google.maps.LatLng(sl, wl),
                         new google.maps.LatLng(nl, el)
                 );
                 console.log(bounds.toString())
+                var latc = (sl + nl) /2.0;
+                var longc = (wl + el) / 2.0;
+                console.log("latc:" + latc + " longc:" + longc);
                 var mapOptions = {
                     //center: bounds.getCenter(),
-                    center: new google.maps.LatLng(sl, wl),
+                   // center: new google.maps.LatLng(sl, wl),
+                    center: new google.maps.LatLng(latc, longc),
                     //  center: {
                     //      lat: sl, lng: wl
                     //  },
