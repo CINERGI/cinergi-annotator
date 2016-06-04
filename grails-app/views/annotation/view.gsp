@@ -42,6 +42,28 @@
     </style>
     <g:javascript>
         $(function () {
+            function calcZoom(sl, wl, nl, el) {
+                var lat_extent = Math.abs(sl - nl);
+                var lon_extent = Math.abs(wl - el);
+                var zoom = 1;
+                if (lat_extent < 1.125 && lon_extent < 2) {
+                    zoom = 8;
+                } else if (lat_extent < 2.25 && lon_extent < 4.0625) {
+                    zoom = 7;
+                } else if (lat_extent < 4.5 && lon_extent < 8.125) {
+                    zoom = 6;
+                } else if (lat_extent < 9 && lon_extent < 16.25) {
+                    zoom = 5;
+                } else if (lat_extent < 18 && lon_extent < 32.5) {
+                    zoom = 4;
+                } else if (lat_extent < 36 && lon_extent < 65) {
+                    zoom = 3;
+                } else if (lat_extent < 72 && lon_extent < 130) {
+                    zoom = 2;
+                }
+                return zoom;
+            }
+
             function initializeMap(sl, wl, nl, el, mapCanvasId) {
                 sl = parseFloat(sl);
                 wl = parseFloat(wl);
@@ -52,17 +74,18 @@
                         new google.maps.LatLng(nl, el)
                 );
                 console.log(bounds.toString())
-                var latc = (sl + nl) /2.0;
+                var latc = (sl + nl) / 2.0;
                 var longc = (wl + el) / 2.0;
-                console.log("latc:" + latc + " longc:" + longc);
+                var zoom = calcZoom(sl, wl, nl, el);
+                console.log("latc:" + latc + " longc:" + longc + " zoom:" + zoom);
                 var mapOptions = {
                     //center: bounds.getCenter(),
-                   // center: new google.maps.LatLng(sl, wl),
+                    // center: new google.maps.LatLng(sl, wl),
                     center: new google.maps.LatLng(latc, longc),
                     //  center: {
                     //      lat: sl, lng: wl
                     //  },
-                    zoom: 8
+                    zoom: zoom
                 };
                 var map = new google.maps.Map(document.getElementById(mapCanvasId),
                         mapOptions);
@@ -141,7 +164,7 @@
                 form$.submit();
             });
 
-           // $('#kwSave').prop('title','Not updated for new Keyword Enhancer changes yet!').prop('disabled',true);
+            // $('#kwSave').prop('title','Not updated for new Keyword Enhancer changes yet!').prop('disabled',true);
         });
     </g:javascript>
 </head>
@@ -179,9 +202,9 @@
                 <div id="keywordsPanel">
                     <g:each in="${keywords}" status="i" var="kw">
                         <div>
-                          %{--  <label for="keyword_${kw.id}">Keyword:</label> --}%
+                            %{--  <label for="keyword_${kw.id}">Keyword:</label> --}%
                             <input id="keyword_${kw.id}" name="keyword_${kw.id}" type="text" value="${kw.keyword}"/>
-                           %{-- <label for="category_${kw.id}">Category:</label> --}%
+                            %{-- <label for="category_${kw.id}">Category:</label> --}%
                             <g:select name="category_${kw.id}" from="${categories}" value="${kw.category}"/>
                             %{--  <input id="category_${kw.id}" type="text" value="${kw.category}" readonly/> --}%
                             <button type="button" class="delete kwd" id="kwDelete_${kw.id}">Delete</button>
@@ -206,7 +229,8 @@
                             <label for="ek_${kw.id}">Keyword:</label>
                             <input id="ek_${kw.id}" name="ek_${kw.id}" type="text" value="${kw.keyword}" readonly/>
                             <label for="ekc_${kw.id}">Category:</label>
-                            <input id="ekc_${kw.id}_${kw.id}" name="ekc_${kw.id}" type="text" value="${kw.category}" readonly/>
+                            <input id="ekc_${kw.id}_${kw.id}" name="ekc_${kw.id}" type="text" value="${kw.category}"
+                                   readonly/>
                         </div>
                     </g:each>
                 </div>
@@ -255,7 +279,7 @@
     <div id="addKeywordTemplate" style="display: none">
         <div>
             <input id="keyword" name="keyword" type="text" value=""/>
-            <g:select name="category" from="${categories}" />
+            <g:select name="category" from="${categories}"/>
             %{--
             <g:select name="category" from="${[
                     'Atmosphere', 'Chemical entity', 'Document',

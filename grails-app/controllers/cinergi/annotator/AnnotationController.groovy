@@ -240,7 +240,7 @@ class AnnotationController {
         if (!title) {
             try {
                 title = dw.originalDoc.'gmi:MI_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:citation'?.'gmd:CI_Citation'?.'gmd:title'?.'gco:CharacterString'?.'_$'
-            } catch(Throwable t) {
+            } catch (Throwable t) {
                 t.printStackTrace()
                 title = null
             }
@@ -248,7 +248,7 @@ class AnnotationController {
         if (!abstractTxt) {
             try {
                 abstractTxt = dw.originalDoc.'gmi:MI_Metadata'?.'gmd:identificationInfo'?.'gmd:MD_DataIdentification'?.'gmd:abstract'?.'gco:CharacterString'?.'_$'
-            } catch(Throwable t) {
+            } catch (Throwable t) {
                 t.printStackTrace()
                 abstractTxt = null
             }
@@ -345,12 +345,16 @@ class AnnotationController {
                         depthFirst(dk, keywordTypeCodeTag, typeList)
                         String type = getText(typeList[0])
                         if (type) {
+                            Set<String> uniqSet = new HashSet<String>()
                             println "type:$type"
                             kList.each { kn ->
                                 String k = getText(kn);
-                                println k
-                                KeywordInfo ki = new KeywordInfo(keyword: k, category: type, id: allIdx++)
-                                existingKeywords << ki
+                                if (!uniqSet.contains(k)) {
+                                    println k
+                                    KeywordInfo ki = new KeywordInfo(keyword: k, category: type, id: allIdx++)
+                                    existingKeywords << ki
+                                    uniqSet.add(k);
+                                }
                             }
                         }
                     }
