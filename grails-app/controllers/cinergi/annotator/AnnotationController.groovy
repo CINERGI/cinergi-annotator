@@ -4,6 +4,7 @@ import com.mongodb.BasicDBList
 import com.mongodb.BasicDBObject
 import org.neuinfo.foundry.common.model.EntityInfo
 import org.neuinfo.foundry.common.model.Keyword
+import org.neuinfo.foundry.common.util.OntologyHandler
 import org.neuinfo.foundry.common.util.ScigraphMappingsHandler
 import org.neuinfo.foundry.common.util.ScigraphMappingsHandler.FacetNode
 import org.neuinfo.foundry.common.util.ScigraphUtils
@@ -200,7 +201,8 @@ class AnnotationController {
             BasicDBObject p = (BasicDBObject) parent
             for (String key : p.keySet()) {
                 if (key == label) {
-                    list << p[key]
+                    def v = p[key]
+                    add2List(v, list)
                 } else {
                     depthFirst(p[key], label, list)
                 }
@@ -213,11 +215,20 @@ class AnnotationController {
         } else {
             if (parent instanceof Map.Entry) {
                 if (parent.key == label) {
-                    list << parent.value
+                    add2List(parent.value, list)
                 } else {
                     depthFirst(parent.value, label, list)
                 }
             }
+        }
+    }
+
+    private def add2List(v, list) {
+        if (v instanceof BasicDBList) {
+            BasicDBList l = (BasicDBList) v
+            l.each { list << it }
+        } else {
+            list << v
         }
     }
 
@@ -318,7 +329,8 @@ class AnnotationController {
         }
         List<KeywordInfo> existingKeywords = prepExistingKeywords(dkList, keywordTag, keywordTypeCodeTag)
 
-        List<String> categories4DD = ScigraphMappingsHandler.getInstance().getSortedCinergiFacets()
+        //List<String> categories4DD = ScigraphMappingsHandler.getInstance().getSortedCinergiFacets()
+        List<String> categories4DD = OntologyHandler.getInstance().getAllFacets()
         if (categories4DD[0] != 'Unassigned') {
             categories4DD.add(0, 'Unassigned')
         }
@@ -344,6 +356,9 @@ class AnnotationController {
                     if (kList) {
                         depthFirst(dk, keywordTypeCodeTag, typeList)
                         String type = getText(typeList[0])
+                        if (!type) {
+                            type = 'theme' // default
+                        }
                         if (type) {
                             Set<String> uniqSet = new HashSet<String>()
                             println "type:$type"
@@ -497,40 +512,7 @@ class AnnotationController {
                 }
             }
 
-            /*
-            keywordList.each { Keyword kw ->
-                Set<String> categories = kw.getCategories()
-                if (categories.size() > 0) {
-                    String category = kw.getTheCategory(chh)
-                    String cinergiCategory = chh.getCinergiCategory(category.toLowerCase())
-                    if (cinergiCategory) {
-                        category = cinergiCategory;
-                    }
-                    List<KeywordInfo> kiList = categoryKwMap[category]
-                    if (!kiList) {
-                        kiList = new ArrayList<KeywordInfo>(5)
-                        categoryKwMap[category] = kiList
-                    }
-                    kiList << new KeywordInfo(keyword: kw.getTerm(), category: category, id: idx)
-                    idx++
-                }
-            }
-            */
-            /*
-            keywords.each { k ->
-                println "EntityInfo:>> " + k.entityInfos[0]
 
-                String category = k.entityInfos[0].category
-                String term = k.term
-                List<KeywordInfo> kiList = categoryKwMap[category]
-                if (!kiList) {
-                    kiList = new ArrayList<KeywordInfo>(5)
-                    categoryKwMap[category] = kiList
-                }
-                kiList << new KeywordInfo(keyword: term, category: category, id: idx)
-                idx++
-            }
-            */
         }
         List<KeywordInfo> keywordList = new ArrayList<KeywordInfo>()
         for (String key : categoryKwMap.keySet()) {
@@ -547,7 +529,8 @@ class AnnotationController {
         }
 
         // List<String> categories4DD = new ArrayList<String>(chh.getSortedCinergiCategories())
-        List<String> categories4DD = ScigraphMappingsHandler.getInstance().getSortedCinergiFacets()
+        //List<String> categories4DD = ScigraphMappingsHandler.getInstance().getSortedCinergiFacets()
+        List<String> categories4DD = OntologyHandler.getInstance().getAllFacets()
         if (categories4DD[0] != 'Unassigned') {
             categories4DD.add(0, 'Unassigned')
         }

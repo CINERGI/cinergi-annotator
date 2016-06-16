@@ -69,7 +69,8 @@ grails.project.dependency.resolution = {
             exported = false
         }
    */
-        compile 'org.apache.httpcomponents:httpclient:jar:4.2.3'
+        compile('org.apache.httpcomponents:httpclient:jar:4.2.3',
+                'net.sourceforge.owlapi:owlapi-distribution:jar:3.5.2')
     }
 
     plugins {
