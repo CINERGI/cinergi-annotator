@@ -23,6 +23,9 @@ modules = {
     vkbeautify {
         resource url: 'js/vkbeautify.js'
     }
+    shorten {
+       resource url: 'js/jquery.shorten.min.js'
+    }
 
 
 }

@@ -64,14 +64,14 @@ class SourceController {
                 DocWrapper.collection.find(['SourceInfo.SourceID'  : sourceInfo.resourceId,
                                             'Processing.status'    : 'finished',
                                             'Data.enhancedKeywords': [$exists: 1]],
-                        ['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
+                        ['primaryKey': 1, 'CrawlDate': 1]).limit(params.max).skip(params.offset).each { dw ->
                     dwList << dw
                 }
             } else {
                 DocWrapper.collection.find(['SourceInfo.SourceID'  : sourceInfo.resourceId,
                                             'Processing.status'    : 'finished',
                                             'Data.enhancedKeywords': [$exists: 1]],
-                        ['primaryKey': 1]).sort(['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
+                        ['primaryKey': 1, 'CrawlDate': 1]).sort(['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
                     dwList << dw
                 }
             }
@@ -80,14 +80,14 @@ class SourceController {
                 // big data sets cannot sort
                 DocWrapper.collection.find(['SourceInfo.SourceID': sourceInfo.resourceId,
                                             'Processing.status'  : 'finished'],
-                        ['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
+                        ['primaryKey': 1, 'CrawlDate': 1]).limit(params.max).skip(params.offset).each { dw ->
                     dwList << dw
                 }
             } else {
                 // .sort(['primaryKey': 1]).
                 DocWrapper.collection.find(['SourceInfo.SourceID': sourceInfo.resourceId,
                                             'Processing.status'  : 'finished'],
-                        ['primaryKey': 1]).sort(['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
+                        ['primaryKey': 1, CrawlDate: 1]).sort(['primaryKey': 1]).limit(params.max).skip(params.offset).each { dw ->
                     dwList << dw
                 }
             }
@@ -95,6 +95,7 @@ class SourceController {
 
         // println "dwList.size:" + dwList.size()
         // println "totalCount:" + totCount
+        println "dwList" + dwList
         render(view: 'view', model: ['siList'        : siList, 'dwList': dwList, 'totCount': totCount,
                                      'selectedSource': selectedSource, enhancedOnly: enhancedOnly])
 

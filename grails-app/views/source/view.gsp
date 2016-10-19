@@ -24,6 +24,7 @@
                 $('#selectedSourceId').val(selSourceId);
                 $(this).closest('form').trigger('submit');
             });
+            $("td.primaryKey").shorten({ moreText:'more', showChars:70});
         });
     </g:javascript>
 </head>
@@ -60,14 +61,16 @@
     <table style="width: 100%; table-layout: fixed;">
         <thead>
         <th>Doc ID</th>
+        <th>Last Updated</th>
         <th style="width: 85px;">Annotation</th>
         </thead>
         <tbody>
         <g:each in="${dwList}" status="i" var="dw">
             <tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
-                <td>
+                <td class="primaryKey">
                     ${dw.primaryKey}
                 </td>
+                <td>${dw.CrawlDate}</td>
                 <td style="width:85px;">
                     <g:link controller="Annotation" action="index" params="${[docId: dw.primaryKey, enhancedOnly: enhancedOnly]}">Annotate</g:link>
                 </td>
