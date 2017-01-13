@@ -70,7 +70,9 @@ grails.project.dependency.resolution = {
         }
    */
         compile('org.apache.httpcomponents:httpclient:jar:4.2.3',
-                'net.sourceforge.owlapi:owlapi-distribution:jar:3.5.2')
+                'net.sourceforge.owlapi:owlapi-distribution:jar:3.5.2',
+                'org.mongodb:mongo-java-driver:2.13.1'
+          )
     }
 
     plugins {
